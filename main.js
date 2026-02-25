@@ -43,7 +43,7 @@ const dashboard = document.getElementById("dashboard");
 const STOCK_CACHE_KEY = "cp_stock_cache_v1";
 let visibleCount = 100;
 let filteredStock = [];
-
+let currentFilter = "all"; // "all" | "low"
 
 
 
@@ -309,26 +309,44 @@ function renderStock(data, searchTerm = "") {
   const rawSearch = searchTerm.trim().toUpperCase();
   const keywords = rawSearch.split(/\s+/).filter(Boolean);
 
-  // Convert object → array
-  const entries = Object.entries(data);
+  // 🔥 SORT by latest updated
+  const entries = Object.entries(data)
+    .sort((a, b) => {
+      const aTime = a[1].updatedAt || 0;
+      const bTime = b[1].updatedAt || 0;
+      return bTime - aTime;
+    });
+    
+    const lowCount = Object.values(data).filter(item =>
+  item.quantity <= item.minStock
+).length;
 
-  // Apply search filter
+document.getElementById("lowCount").innerText = lowCount;
+
+  // 🔍 Filter
   filteredStock = entries.filter(([id, item]) => {
 
-    const models = Object.keys(item.compatibleModels || {});
-    const searchableText = (
-      item.name + " " + models.join(" ")
-    ).toUpperCase();
+  const models = Object.keys(item.compatibleModels || {});
+  const searchableText = (
+    item.name + " " + models.join(" ")
+  ).toUpperCase();
 
-    return keywords.every(keyword =>
-      searchableText.includes(keyword)
-    );
-  });
+  const matchesSearch = keywords.every(keyword =>
+    searchableText.includes(keyword)
+  );
 
-  // Reset visibleCount when searching
+  const isLowStock = item.quantity <= item.minStock;
+
+  if (currentFilter === "low" && !isLowStock) {
+    return false;
+  }
+
+  return matchesSearch;
+});
+
   if (searchTerm) visibleCount = filteredStock.length;
 
-  // Render only visibleCount
+  // 🔢 Render limited
   filteredStock.slice(0, visibleCount).forEach(([id, item]) => {
 
     const models = Object.keys(item.compatibleModels || {});
@@ -453,6 +471,26 @@ document.querySelector('#fab').onclick=()=>location.hash='add-item'
 
 
 
+
+
+
+// filter by header filter
+const allBtn = document.querySelector(".all");
+const lowBtn = document.querySelector(".low");
+
+allBtn.onclick = () => {
+  currentFilter = "all";
+  allBtn.classList.add("active");
+  lowBtn.classList.remove("active");
+  renderStock(allStockData, stockSearch.value);
+};
+
+lowBtn.onclick = () => {
+  currentFilter = "low";
+  lowBtn.classList.add("active");
+  allBtn.classList.remove("active");
+  renderStock(allStockData, stockSearch.value);
+};
 
 
 
