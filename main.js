@@ -40,6 +40,9 @@ const messageEl = document.getElementById("message");
 
 const authBox = document.getElementById("authBox");
 const dashboard = document.getElementById("dashboard");
+const STOCK_CACHE_KEY = "cp_stock_cache_v1";
+let visibleCount = 100;
+let filteredStock = [];
 
 
 
@@ -266,15 +269,35 @@ document.getElementById("createJobBtn").onclick = async () => {
 };
 
 
-
 // search logic
 const stockSearch = document.getElementById("stockSearch");
 let allStockData = {};
 
+// 1️⃣ Load from localStorage first
+const cachedStock = localStorage.getItem(STOCK_CACHE_KEY);
+
+if (cachedStock) {
+  try {
+    allStockData = JSON.parse(cachedStock);
+    renderStock(allStockData);
+  } catch (err) {
+    console.error("Cache parse error");
+  }
+}
+
+// 2️⃣ Then listen realtime from Firebase
 onValue(ref(db, "stock"), snapshot => {
 
   allStockData = snapshot.val() || {};
+
+  // Update UI
   renderStock(allStockData);
+
+  // Save fresh copy to localStorage
+  localStorage.setItem(
+    STOCK_CACHE_KEY,
+    JSON.stringify(allStockData)
+  );
 
 });
 
@@ -284,30 +307,34 @@ function renderStock(data, searchTerm = "") {
   stockList.innerHTML = "";
 
   const rawSearch = searchTerm.trim().toUpperCase();
-
-  // split into individual words
   const keywords = rawSearch.split(/\s+/).filter(Boolean);
 
-  Object.entries(data).forEach(([id, item]) => {
+  // Convert object → array
+  const entries = Object.entries(data);
+
+  // Apply search filter
+  filteredStock = entries.filter(([id, item]) => {
+
+    const models = Object.keys(item.compatibleModels || {});
+    const searchableText = (
+      item.name + " " + models.join(" ")
+    ).toUpperCase();
+
+    return keywords.every(keyword =>
+      searchableText.includes(keyword)
+    );
+  });
+
+  // Reset visibleCount when searching
+  if (searchTerm) visibleCount = filteredStock.length;
+
+  // Render only visibleCount
+  filteredStock.slice(0, visibleCount).forEach(([id, item]) => {
 
     const models = Object.keys(item.compatibleModels || {});
     const modelSpans = models
       .map(m => `<span class="model-badge">${m}</span>`)
       .join("");
-
-    // Combine everything searchable into one string
-    const searchableText = (
-      item.name + " " + models.join(" ")
-    ).toUpperCase();
-
-    // 🔥 Every keyword must match somewhere
-    const matchesAllKeywords = keywords.every(keyword =>
-      searchableText.includes(keyword)
-    );
-
-    if (keywords.length && !matchesAllKeywords) {
-      return;
-    }
 
     const low = item.quantity <= item.minStock;
 
@@ -315,20 +342,73 @@ function renderStock(data, searchTerm = "") {
       <div class='list-item'>
         <p class='name'>${item.name}</p>
         <div class='models'>${modelSpans}</div>
-        <hr>
-        <div class='bottom-box'>
-          <span>
-            <p class='title'>Current stock</p>
-            <p class='${low ? 'low-count' : 'stock-count'}'>
-              ${item.quantity}
-            </p>
+        <div class="qty-control">
+          <button class="qty-btn minus" data-id="${id}">-</button>
+          <span class="${low ? 'low-count' : 'stock-count'}">
+            ${item.quantity}
           </span>
+          <button class="qty-btn plus" data-id="${id}">+</button>
         </div>
-        ${low ? "<span class='low'>Low stock</span>" : ""}
       </div>
     `;
   });
+
 }
+
+
+// infinity scroll
+
+window.addEventListener("scroll", () => {
+
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+
+    if (visibleCount < filteredStock.length) {
+      visibleCount += 100;
+      renderStock(allStockData, stockSearch.value);
+    }
+
+  }
+
+});
+
+//
+
+
+stockList.onclick = async (e) => {
+
+  if (!e.target.classList.contains("qty-btn")) return;
+
+  const partId = e.target.dataset.id;
+  const isPlus = e.target.classList.contains("plus");
+
+  const snap = await get(ref(db, "stock/" + partId));
+  const item = snap.val();
+
+  if (!item) return;
+
+  let newQty = item.quantity;
+
+  if (isPlus) {
+    newQty += 1;
+  } else {
+    if (item.quantity <= 0) return; // prevent negative
+    newQty -= 1;
+  }
+
+  await update(ref(db, "stock/" + partId), {
+    quantity: newQty,
+    updatedAt: Date.now()
+  });
+
+  // Log movement
+  await push(ref(db, "stockLogs"), {
+    partId,
+    change: isPlus ? 1 : -1,
+    type: "MANUAL_ADJUST",
+    createdAt: Date.now()
+  });
+
+};
 
 
 // listen to search input
@@ -383,3 +463,5 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js");
   });
 }
+
+

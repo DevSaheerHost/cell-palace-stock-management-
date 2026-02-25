@@ -173,8 +173,8 @@ main *{
 }
 
 .list-item .low-count{
-  color: #fff;
-  background: #F72121;
+  color: #F72121;
+  background: #fff;
   height: 30px;
   width: 30px;
   border-radius: 100px;
@@ -309,6 +309,37 @@ header .table div.active::after{
   justify-content: flex-end;
 }
 
+
+
+
+
+
+
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #1565c0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn.minus {
+  background: #d32f2f;
+}
 
 .hidden{
     display: none;
