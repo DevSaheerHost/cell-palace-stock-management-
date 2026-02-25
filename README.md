@@ -183,3 +183,16 @@ const search = words[words.length - 1];
     `;
   });
 }
+
+
+
+
+
+        <div class="qty-control">
+          <button class="qty-btn minus" data-id="${id}">-</button>
+          <span class="${low ? 'low-count' : 'stock-count'}">
+            ${item.quantity}
+          </span>
+          <button class="qty-btn plus" data-id="${id}">+</button>
+          ${low?`<p class='low'>Low stock</p>`:''}
+        </div>

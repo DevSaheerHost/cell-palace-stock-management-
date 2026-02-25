@@ -44,7 +44,7 @@ const STOCK_CACHE_KEY = "cp_stock_cache_v1";
 let visibleCount = 100;
 let filteredStock = [];
 let currentFilter = "all"; // "all" | "low"
-
+let editingId = null;
 
 
 
@@ -180,7 +180,10 @@ document.getElementById("addStockBtn").onclick = async () => {
   });
 
   // 🔹 Create unique ID based on part name (NOT model)
-  const id = name.replace(/\s+/g, "_").toLowerCase();
+  //const id = name.replace(/\s+/g, "_").toLowerCase();
+  const id = editingId 
+  ? editingId 
+  : name.replace(/\s+/g, "_").toLowerCase();
 
   await update(ref(db, "stock/" + id), {
     name,
@@ -191,7 +194,13 @@ document.getElementById("addStockBtn").onclick = async () => {
     updatedAt: Date.now()
   });
   history.back()
-
+  editingId = null;
+  
+  partName.value = ''
+  partModel.value = ''
+  partQty.value = ''
+  partCost.value = ''
+  minStock.value = ''
 };
 
 
@@ -290,7 +299,7 @@ if (cachedStock) {
 
 // 2️⃣ Then listen realtime from Firebase
 onValue(ref(db, "stock"), snapshot => {
-
+  document.querySelector('#fab').classList.remove('hidden')
   allStockData = snapshot.val() || {};
 
   // Update UI
@@ -410,14 +419,18 @@ document.getElementById("totalCount").innerText = `${totalItems}, Number of spar
       <div class='list-item'>
         <p class='name'>${item.name}</p>
         <div class='models'>${modelSpans}</div>
+
+        
         <div class="qty-control">
-          <button class="qty-btn minus" data-id="${id}">-</button>
-          <span class="${low ? 'low-count' : 'stock-count'}">
-            ${item.quantity}
-          </span>
-          <button class="qty-btn plus" data-id="${id}">+</button>
-          ${low?`<p class='low'>Low stock</p>`:''}
-        </div>
+  <button class="qty-btn minus" data-id="${id}">-</button>
+  <span class="${low ? 'low-count' : 'stock-count'}">
+    ${item.quantity}
+  </span>
+  <button class="qty-btn plus" data-id="${id}">+</button>
+</div>
+
+<button class="edit-btn" data-id="${id}">Edit</button>
+${low?`<p class='low'>Low stock</p>`:''}
       </div>
     `;
   });
@@ -445,10 +458,19 @@ window.addEventListener("scroll", () => {
 
 stockList.onclick = async (e) => {
 
-  if (!e.target.classList.contains("qty-btn")) return;
+  //if (!e.target.classList.contains("qty-btn")) return;
+  const editBtn = e.target.closest(".edit-btn");
+if (editBtn) {
+  const partId = editBtn.dataset.id;
+  startEdit(partId);
+  return;
+}
 
-  const partId = e.target.dataset.id;
-  const isPlus = e.target.classList.contains("plus");
+const qtyBtn = e.target.closest(".qty-btn");
+if (!qtyBtn) return;
+
+  const partId = qtyBtn.dataset.id;
+const isPlus = qtyBtn.classList.contains("plus");
 
   const snap = await get(ref(db, "stock/" + partId));
   const item = snap.val();
@@ -480,9 +502,30 @@ stockList.onclick = async (e) => {
 };
 
 
+
+
+// startEdit Function
+function startEdit(partId) {
+
+  const item = allStockData[partId];
+  if (!item) return;
+
+  editingId = partId;
+
+  partName.value = item.name;
+  partModel.value = Object.keys(item.compatibleModels || {}).join(", ");
+  partQty.value = item.quantity;
+  partCost.value = item.cost || "";
+  minStock.value = item.minStock || "";
+
+  location.hash = "add-item";
+}
+
+
 // listen to search input
 stockSearch.addEventListener("input", e => {
   renderStock(allStockData, e.target.value);
+  window.scrollTo(0 , 0)
 });
 
 

@@ -223,7 +223,7 @@ main *{
 input, button{
     background: #ECF5FF;
     border: 1px solid #E1E1E1;
-    padding: 0.3rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     border-radius: 7px;
     font-weight: 600;
 }
@@ -251,6 +251,9 @@ header{
     padding: 1rem;
     padding-bottom: 0;
     animation: none;
+    position: sticky;
+    top: -60px;
+    z-index: 5;
 }
 header * {
   animation: none;
@@ -258,9 +261,12 @@ header * {
 
 header input{
     margin-top: 1rem;
-    
     width: 100%;
+    position: sticky;
+    z-index: 10;
+    top: 10px;
 }
+
 header .table{
     display: flex;
     align-items: center;
@@ -369,6 +375,22 @@ header .low span{
   background: #d32f2f;
 }
 
+
+
+.edit-btn {
+  margin-top: 6px;
+  padding: 4px 40px;
+  border: none;
+  border-radius: 6px;
+  background: #444;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .hidden{
-    display: none;
+    display: none !important;
 }
