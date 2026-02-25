@@ -366,6 +366,7 @@ document.getElementById("lowCount").innerText = lowCount;
             ${item.quantity}
           </span>
           <button class="qty-btn plus" data-id="${id}">+</button>
+          ${low?`<p class='low'>Low stock</p>`:''}
         </div>
       </div>
     `;
