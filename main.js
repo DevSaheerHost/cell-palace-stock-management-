@@ -370,3 +370,16 @@ window.addEventListener("hashchange", router);
 window.addEventListener("load", router);
 
 document.querySelector('#fab').onclick=()=>location.hash='add-item'
+
+
+
+
+
+
+
+/* KEEP IT BOTTOM*/
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
