@@ -525,7 +525,10 @@ function startEdit(partId) {
 // listen to search input
 stockSearch.addEventListener("input", e => {
   renderStock(allStockData, e.target.value);
-  window.scrollTo(0 , 0)
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
 });
 
 
