@@ -71,7 +71,6 @@ document.getElementById("registerBtn").onclick = async () => {
   }
 };
 
-
 document.getElementById("loginBtn").onclick = async () => {
   try {
     const userCred = await signInWithEmailAndPassword(
@@ -86,7 +85,8 @@ document.getElementById("loginBtn").onclick = async () => {
       return;
     }
 
-    showDashboard();
+    history.replaceState(null, null, "#home");
+
   } catch (err) {
     messageEl.innerText = err.message;
   }
@@ -111,14 +111,17 @@ onAuthStateChanged(auth, async (user) => {
 
     showDashboard();
   } else {
-    authBox.style.display = "block";
-    dashboard.style.display = "none";
+    history.replaceState(null, null, "#auth");
+router();
   }
 });
 
 function showDashboard() {
-  authBox.style.display = "none";
-  dashboard.style.display = "block";
+     //history.replaceState(null, null, "#home");
+     showPage('home');
+  
+     
+
 }
 
 
@@ -317,11 +320,58 @@ function renderStock(data, searchTerm = "") {
       return bTime - aTime;
     });
     
-    const lowCount = Object.values(data).filter(item =>
+//     const lowCount = Object.values(data).filter(item =>
+//   item.quantity <= item.minStock
+// ).length;
+
+
+
+// const totalItems = Object.keys(data).length;
+// const totalQuantity = Object.values(data)
+//   .reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+
+
+
+
+const values = Object.values(data);
+
+// Total different products
+const totalItems = values.length;
+
+// Total physical pieces
+const totalQuantity = values.reduce(
+  (sum, item) => sum + (item.quantity || 0), 0
+);
+
+// Low stock count
+const lowCount = values.filter(item =>
   item.quantity <= item.minStock
 ).length;
 
+// Last updated
+let lastUpdatedItem = null;
+
+Object.values(data).forEach(item => {
+  if (!lastUpdatedItem || 
+      (item.updatedAt || 0) > (lastUpdatedItem.updatedAt || 0)) {
+    lastUpdatedItem = item;
+  }
+});
+
+const lastUpdatedName = lastUpdatedItem
+  ? lastUpdatedItem.name
+  : "—";
+
+
 document.getElementById("lowCount").innerText = lowCount;
+document.getElementById("lowCount2").innerText = lowCount;
+document.getElementById("lastUpdated").innerText = lastUpdatedName;
+document.getElementById("totalCount").innerText = `${totalItems}, Number of spares : ${totalQuantity}`;
+
+
+
+
 
   // 🔍 Filter
   filteredStock = entries.filter(([id, item]) => {

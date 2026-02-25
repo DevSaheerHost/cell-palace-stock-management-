@@ -170,6 +170,13 @@ main *{
   border-radius: 0 0px 0px 10px;
   padding: 0.2rem 0.5rem;
   font-size: 10px;
+  transition: all 0.3s ease;
+  animation: fadeUp 1s ease;
+}
+@keyframes fadeUp{
+  0%, 70%{
+    opacity: 0;
+  }
 }
 
 .list-item .low-count{
@@ -325,6 +332,11 @@ header .low span{
   justify-content: flex-end;
 }
 
+#message{
+  font-size: 12px;
+  color: red;
+  font-weight: 500;
+}
 
 
 
