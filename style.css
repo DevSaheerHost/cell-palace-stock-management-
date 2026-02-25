@@ -1,249 +1,315 @@
-*{
-  padding: 0;
-  margin: 0;
-  outline: none;
-  border: none;
-  font-family: sans-serif;
-}
-body {
-    padding: 0;
-    background: black;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+.poppins-thin {
+  font-family: "Poppins", sans-serif;
+  font-weight: 100;
+  font-style: normal;
 }
 
-main{
-  display: none;
+.poppins-extralight {
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  font-style: normal;
 }
-header {
-  color: white;
-  padding: 8px 6px;
+
+.poppins-light {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: normal;
 }
-header container{
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
+
+.poppins-regular {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
-header svg{
-  padding: 6px;
+
+.poppins-medium {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
 }
-header label{
-  color: #9E9E9E;
+
+.poppins-semibold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
 }
-header nav{
-  background: #1C1C1C;
-  border-radius: 4px;
-  padding: 6px;
-  display: flex;
-  align-items: center;
+
+.poppins-bold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.poppins-extrabold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.poppins-black {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.poppins-thin-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.poppins-extralight-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.poppins-light-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.poppins-regular-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.poppins-medium-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.poppins-semibold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.poppins-bold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.poppins-extrabold-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.poppins-black-italic {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    outline: none;
+    font-family: "Poppins", sans-serif;
+}
+body{
+  background: #F1F1F1;
+}
+main *{
+  transition: all 0.3s;
+  animation: fade 0.3s ease;
+}
+@keyframes fade {
+  from{
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.flex-between{
+    display: flex;
+    align-items: center;justify-content: space-between;
+}
+
+.list{
+  padding: 1rem;
+}
+.list-item{
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 7px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+  position: relative;
+}
+.list-item .name{
+  font-weight: 600;
   
 }
-header .account-icon svg{
-  width: 30px;
-  height: 30px;
-  color: #9E9E9E;
+.list-item .model-badge {
+  display: inline-block;
+  background: #e8eaff;
+  color: #2f2f2f;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
-splash{
-  position: fixed;
+.list-item .low {
+  color: red;
+  font-weight: 500;
+  position: absolute;
   top: 0;
-  height: 100vh;
+  right: 0;
+  background: #F72121;
+  color: #fff;
+  border-radius: 0 0px 0px 10px;
+  padding: 0.2rem 0.5rem;
+  font-size: 10px;
+}
+
+.list-item .low-count{
+  color: #fff;
+  background: #F72121;
+  height: 30px;
+  width: 30px;
+  border-radius: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: black;
-  z-index: 99;
 }
-splash img{
-  max-width: 100%;
-}
-
-
-/*game lyt*/
-game-layout {
-  padding: 20px;
-}
-
-/* game-layout container{
-  padding: 10px;
-}
- */
-game-layout > container > card{
-  display: flex;
-  background: #95F2FB;
-  padding: 8px;
-  border-radius: 50px;
-  justify-content: space-between;
-  margin: auto;
-  max-width: 85%;
-}
- game-layout > container > card span{
-  display: flex;
-  width: max-content;
-  align-items: center;
-}
-game-layout .circle{
-  background: floralwhite;
-  height: 33px;
-  width: 33px;
+.list-item .stock-count{
+  color: #fff;
+  background: #0070FF;
+  height: 30px;
+  width: 30px;
   border-radius: 100px;
-  
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-game-layout > container > card label{
-  padding: 0 6px;
-  font-weight: 300;
-}
-/* .arrow svg{
-  stroke: black;
-} */
 
+.list-item hr{
+  margin-top: 0.5rem;
+}
 
-/* app lyt */
-app-layout{
-  display: none;
-  padding: 0px;
-}
-banner{
-  background: url("assets/ff-banner.jpg");
-  min-height: 24vh;
-  height: 150px;
-  background-size: cover;
-  background-repeat: no-repeat;
-  width: 84%;
-  display: block;
-  border-radius: 4px;
-  overflow: hidden;
-  padding: 8px;
-  color: white;
-  position: relative;
-  background-blend-mode: color-burn;
-  margin: auto;
-  overflow: hidden;
-}
-hori{
+.list-item .bottom-box{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: absolute;
-  bottom: 0;
-  padding: 8px;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to bottom, transparent, #000000B5);
+  margin-top: 0.5rem;
 }
-
-hori img{
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  
+.list-item .bottom-box span{
+  text-align: center;
 }
-hori button{
-  background: none;
-  border: 1px solid white;
-  color: white;
-  border-radius: 4px;
-  padding: 8px 20px;
-}
-hori button:hover{
-  color: black;
-  background: white;
-}
-hori .vert{
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-}
-.hori{
-  display: flex;
-  flex-flow: row;
+.list-item .title{
+  color: #84A0C2;
   font-size: 10px;
-  width: 100%;
-  justify-content: space-around;
-}
-
-/* -------------- */
-/* section1 */
-
-section{
-  color: white;
-  overflow: hidden;
-  padding: 20px;
-}
-section nav{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-section nav span{
-  color: #9E9E9E;
-  display: flex;
-  align-items: center;
-}
-section nav span label {
-  padding: 0 8px;
-}
-
-appscroll{
-  overflow-x: scroll;
-  padding: 0 6px;
-}
-appscroll container{
-  width: fill;
-  display: block;
-  /* background: #E3E3E330; */
-  display: flex;
-  flex-flow: row;
-  overflow: scroll;
-  padding: 0 6px;
-}
-appscroll > container > card{
-  height: 100%;
-  min-width: 90px;
-  display: block;
-  border-radius: 4px;
-  text-align: start;
-  margin: 8px;
-}
-appscroll > container > card img{
-  width: 100%;
-  border-radius: 8px;
-}
-
-/* updates lyt */
-
-updates-layout{
-  display: none;
-  color: white;
-  text-align: center;
-  color: #585858;
+  font-weight: 600;
 }
 
 
-
-footer{
+input, button{
+    background: #ECF5FF;
+    border: 1px solid #E1E1E1;
+    padding: 0.3rem 0.5rem;
+    border-radius: 7px;
+    font-weight: 600;
+}
+button.fab{
+  height: 60px;
+  width: 60px;
+  border-radius: 100px;
+  background: #0070FF;
+  color: #fff;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 6px;
-  border-top: 1px solid #585858;
-  background: black;
-}
-footer container{
+  bottom: 2rem;
+  right: 1rem;
+  
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  padding: 1rem;
+  box-shadow: 2px 2px 7px 1px rgba(0, 0, 0, 0.26);
+  border: none;
 }
-footer span {
-  display: flex;
-  flex-flow: column;
+
+header{
+    background: #0070FF;
+    color: #fff;
+    padding: 1rem;
+    padding-bottom: 0;
+    animation: none;
+}
+header * {
+  animation: none;
+}
+
+header input{
+    margin-top: 1rem;
+    
+    width: 100%;
+}
+header .table{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+header .table div{
+    flex: 1;
+    text-align: center;
+    padding-bottom: 1rem;
+    position: relative;
+}
+
+header .table div.active{
+    font-weight: 600;
+}
+
+header .table div.active::after{
+    content: "";
+    height: 3px;
+    background: #DAC000;
+    display: block;
+    border-radius: 7px 7px 0 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+
+/* create job*/
+
+.form{
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 7px;
   text-align: center;
+  margin: 2rem;
+}
+.form input{
+  margin: auto;
+  margin-top: 0.5rem;
+}
+.form button{
+  margin-top: 2rem;
+  background: #0070FF;
+  color: #fff;
+  margin-right: 0;
+}
+.form .btn-flex{
+  display: flex;
   align-items: center;
-  color: #9E9E9E;
-  width: min-content;
+  justify-content: flex-end;
 }
-footer .game-btn{
-  color: white;
-}
-footer span svg{
-  margin-bottom: 6px;
+
+
+.hidden{
+    display: none;
 }
