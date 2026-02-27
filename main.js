@@ -38,6 +38,9 @@ const emailEl = document.getElementById("email");
 const passwordEl = document.getElementById("password");
 const messageEl = document.getElementById("message");
 
+const bottomNavs = document.querySelectorAll('#bottomNav span')
+
+
 const authBox = document.getElementById("authBox");
 const dashboard = document.getElementById("dashboard");
 const STOCK_CACHE_KEY = "cp_stock_cache_v1";
@@ -209,34 +212,64 @@ document.getElementById("addStockBtn").onclick = async () => {
 const stockList = document.getElementById("stockList");
 const jobPartSelect = document.getElementById("jobPartSelect");
 
+const jobPartInput = document.getElementById("jobPartInput");
+const suggestions = document.getElementById("suggestions");
+const selectedPartId = document.getElementById("selectedPartId");
+
+let stockItems = [];
+
 onValue(ref(db, "stock"), snapshot => {
-
-  stockList.innerHTML = "";
-  jobPartSelect.innerHTML = "";
-
   const data = snapshot.val();
-  if(!data) return;
+  if (!data) return;
 
-  Object.entries(data).forEach(([id, item]) => {
-
-  const low = item.quantity <= item.minStock;
-
-  const models = Object.keys(item.compatibleModels || {}).join(", ");
-
-  stockList.innerHTML += `
-    <div>
-      ${item.name} (${models}) - Qty: ${item.quantity}
-      ${low ? "<span style='color:red;'> LOW</span>" : ""}
-    </div>
-  `;
-
-  jobPartSelect.innerHTML += `
-    <option value="${id}">
-      ${item.name} (${models})
-    </option>
-  `;
+  stockItems = Object.entries(data).map(([id, item]) => {
+    return {
+      id,
+      name: item.name,
+      models: Object.keys(item.compatibleModels || {}).join(", "),
+      quantity: item.quantity,
+      minStock: item.minStock
+    };
+  });
 });
 
+
+
+jobPartInput.addEventListener("input", () => {
+  const value = jobPartInput.value.toLowerCase();
+  suggestions.innerHTML = "";
+
+  if (!value) return;
+
+  const filtered = stockItems.filter(item =>
+    item.name.toLowerCase().includes(value) ||
+    item.models.toLowerCase().includes(value)
+  );
+
+  filtered.forEach(item => {
+    const div = document.createElement("div");
+    if (item.quantity === 0) {
+  div.classList.add("outof-stock");
+}
+    const modelSpans = item.models
+  .split(",")
+  .map(model => `<span class="model-tag">${model.trim()}</span>`)
+  .join(" ");
+      const low = item.quantity <= item.minStock;
+
+    div.innerHTML = `
+    ${item.name} 
+    <br>
+    <span>${modelSpans}</span> -  <p class='qty ${low?'low':''} ${item.minStock==0?'empty': ''}'>${item.quantity}</p>`;
+    
+    div.onclick = () => {
+      jobPartInput.value = `${item.name} (${item.models})`;
+      selectedPartId.value = item.id;
+      suggestions.innerHTML = "";
+    };
+
+    suggestions.appendChild(div);
+  });
 });
 
 
@@ -245,9 +278,9 @@ onValue(ref(db, "stock"), snapshot => {
 
 document.getElementById("createJobBtn").onclick = async () => {
 
-  const partId = jobPartSelect.value;
+  //const partId = jobPartSelect.value;
+  const partId = document.getElementById("selectedPartId").value;
   const usedQty = Number(document.getElementById("jobQty").value);
-
   const stockSnap = await get(ref(db, "stock/" + partId));
   const stockData = stockSnap.val();
 
@@ -299,7 +332,8 @@ if (cachedStock) {
 
 // 2️⃣ Then listen realtime from Firebase
 onValue(ref(db, "stock"), snapshot => {
-  document.querySelector('#fab').classList.remove('hidden')
+  //document.querySelector('#fab').classList.remove('hidden')
+  document.querySelector('#bottomNavContainer').classList.remove('hidden')
   allStockData = snapshot.val() || {};
 
   // Update UI
@@ -414,25 +448,34 @@ document.getElementById("totalCount").innerText = `${totalItems}, Number of spar
       .join("");
 
     const low = item.quantity <= item.minStock;
-
+    
+const isOut = item.quantity === 0;
+const isLow = item.quantity > 0 && item.quantity <= item.minStock;
     stockList.innerHTML += `
-      <div class='list-item'>
-        <p class='name'>${item.name}</p>
-        <div class='models'>${modelSpans}</div>
+  <div class='list-item ${isOut ? 'outof-stock' : ''}'>
+    <p class='name'>${item.name}</p>
+    <div class='models'>${modelSpans}</div>
 
-        
-        <div class="qty-control">
-  <button class="qty-btn minus" data-id="${id}">-</button>
-  <span class="${low ? 'low-count' : 'stock-count'}">
-    ${item.quantity}
-  </span>
-  <button class="qty-btn plus" data-id="${id}">+</button>
-</div>
+    <div class="qty-control">
+      <button class="qty-btn minus" data-id="${id}">-</button>
+      <span class="${isLow ? 'low-count' : isOut? 'out-count' : 'stock-count'}">
+        ${item.quantity}
+      </span>
+      <button class="qty-btn plus" data-id="${id}">+</button>
+    </div>
 
-<button class="edit-btn" data-id="${id}">Edit</button>
-${low?`<p class='low'>Low stock</p>`:''}
-      </div>
-    `;
+    <button class="edit-btn" data-id="${id}">Edit</button>
+
+    ${
+      isOut
+        ? `<p class='out'>Out of stock</p>`
+        : isLow
+        ? `<p class='low'>Low stock</p>`
+        : ''
+    }
+
+  </div>
+`;
   });
 
 }
@@ -600,3 +643,19 @@ if ("serviceWorker" in navigator) {
 }
 
 
+
+
+// bottom nav
+
+
+bottomNavs.forEach(n=>{
+  n.onclick = (e)=>{
+    const link = e.currentTarget.dataset.link;
+   //location.hash = link
+    bottomNavs.forEach(e=>e.classList.remove('active'))
+    e.currentTarget.classList.add('active')
+  // location.replace(`/#${link}`)
+  history.replaceState(null, null, `#${link}`)
+  router()
+  }
+});

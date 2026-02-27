@@ -130,12 +130,43 @@
 
     <input id="jobCustomer" placeholder="Customer Name">
   <input id="jobModel" placeholder="Device Model">
-  <select id="jobPartSelect"></select>
+  <select id="jobPartSelect" class="hidden"></select>
+  
+  <input type="text" id="jobPartInput" placeholder="Search part...">
+<div id="suggestions" class="suggestions"></div>
+
+<input type="hidden" id="selectedPartId">
+
+
   <input id="jobQty" type="number" placeholder="Qty Used">
   <button id="createJobBtn">Create Job</button>
 </div>
 
 </main>
+
+
+<div class="bottom-nav-wraper hidden" id="bottomNavContainer">
+  
+<nav class="bottom-nav" id="bottomNav">
+  <span class="home active" data-link="">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  </span>
+  
+  <span class="create_job" data-link="create-job">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+    </svg>
+  </span>
+  
+  <span class="create" data-link="add-item">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  </span>
+</nav>
+</div>
 
 
 
