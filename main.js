@@ -659,3 +659,108 @@ bottomNavs.forEach(n=>{
   router()
   }
 });
+
+
+window.addEventListener("error", (event) => {
+  logError({
+    type: "runtime",
+    message: event.message,
+    source: event.filename,
+    line: event.lineno,
+    column: event.colno,
+    stack: event.error?.stack
+  });
+});
+
+
+window.addEventListener("unhandledrejection", (event) => {
+  logError({
+    type: "promise",
+    message: event.reason?.message || "Unhandled Promise",
+    stack: event.reason?.stack
+  });
+});
+
+
+
+function logError(data) {
+  const errorData = {
+    ...data,
+    url: location.href,
+    userAgent: navigator.userAgent,
+    time: new Date().toISOString()
+  };
+
+  console.error("Logged Error:", errorData);
+
+  saveToFirebase(errorData);
+}
+
+
+
+// send errors to db
+function saveToFirebase(errorData) {
+  push(ref(db, `logs/errors`), errorData);
+  alert('Error : '+ errorData.message)
+}
+
+
+
+
+
+
+const getJobUI=j=>{
+  const date = new Date(j.createdAt);
+console.log(date.toLocaleString());
+  return`
+  <div class='job-card'>
+  <p class='name'>
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+</svg>
+${j.customer}</p>
+  <p class='device'>${j.device}</p>
+  <p class='part'>${j.usedPart}</p>
+  <p class='part'>${date.toLocaleString()}</p>
+<hr>
+  </div>
+  `
+}
+
+//get history 
+async function getAllJobs() {
+  try {
+    const snapshot = await get(ref(db, "jobs"));
+
+    if (!snapshot.exists()) {
+      console.log("No jobs found");
+      return [];
+    }
+
+    const data = snapshot.val();
+
+    // Convert object → array with id
+    const jobs = Object.entries(data).map(([id, value]) => ({
+      id,
+      ...value
+    }));
+
+    return jobs;
+
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    return [];
+  }
+}
+
+
+getAllJobs().then(jobs => {
+  console.log(jobs);
+  jobs.forEach(j=>showJobsToUI(j))
+});
+
+const showJobsToUI=job=>{
+  const jobcontainer=document.querySelector('#jobcontainer')
+  jobcontainer.innerHTML+=getJobUI(job)
+ //console.log(job)
+}

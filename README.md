@@ -196,3 +196,15 @@ const search = words[words.length - 1];
           <button class="qty-btn plus" data-id="${id}">+</button>
           ${low?`<p class='low'>Low stock</p>`:''}
         </div>
+        
+        
+        
+        
+        logs
+ └── errors
+      └── -Nabc123
+           ├── type: runtime
+           ├── message: ...
+           ├── stack: ...
+           ├── url: ...
+           ├── time: ...
