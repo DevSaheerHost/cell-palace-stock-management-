@@ -127,7 +127,24 @@ function showDashboard() {
 
 }
 
+const isUserauth = () => {
+  const user = auth.currentUser;
 
+  if (!user) {
+    console.log("User not logged in");
+    messageEl.innerText = "Login first.";
+    return false;
+  }
+
+  if (!user.emailVerified) {
+    console.log("Email not verified");
+    messageEl.innerText = "Verify email first.";
+    return false;
+  }
+
+  console.log("User authenticated:", user.uid);
+  return true;
+};
 
 
 
@@ -163,6 +180,11 @@ const minStock = document.getElementById("minStock");
 
 document.getElementById("addStockBtn").onclick = async () => {
 
+if(!isUserauth()){
+  history.replaceState(null, null, "#auth");
+router();
+  return
+}
   const name = partName.value.trim();
   const modelInput = partModel.value.trim(); // comma separated
   const qty = Number(partQty.value);
@@ -277,7 +299,11 @@ jobPartInput.addEventListener("input", () => {
 // Create Job (Auto Deduct)
 
 document.getElementById("createJobBtn").onclick = async () => {
-
+if(!isUserauth()){
+  history.replaceState(null, null, "#auth");
+router();
+  return
+}
   //const partId = jobPartSelect.value;
   const partId = document.getElementById("selectedPartId").value;
   const usedQty = Number(document.getElementById("jobQty").value);
@@ -429,8 +455,13 @@ document.getElementById("totalCount").innerText = `${totalItems}, Number of spar
   );
 
   const isLowStock = item.quantity <= item.minStock;
+  const isOutStock = item.quantity === 0;
 
   if (currentFilter === "low" && !isLowStock) {
+    return false;
+  }
+
+  if (currentFilter === "out" && !isOutStock) {
     return false;
   }
 
@@ -617,11 +648,13 @@ document.querySelector('#fab').onclick=()=>location.hash='add-item'
 // filter by header filter
 const allBtn = document.querySelector(".all");
 const lowBtn = document.querySelector(".low");
+const outBtn = document.querySelector(".out");
 
 allBtn.onclick = () => {
   currentFilter = "all";
   allBtn.classList.add("active");
   lowBtn.classList.remove("active");
+  outBtn.classList.remove('active')
   renderStock(allStockData, stockSearch.value);
 };
 
@@ -629,6 +662,15 @@ lowBtn.onclick = () => {
   currentFilter = "low";
   lowBtn.classList.add("active");
   allBtn.classList.remove("active");
+  outBtn.classList.remove('active')
+  renderStock(allStockData, stockSearch.value);
+};
+
+outBtn.onclick = () => {
+  currentFilter = "out";
+  outBtn.classList.add("active");
+  allBtn.classList.remove("active");
+  lowBtn.classList.remove('active')
   renderStock(allStockData, stockSearch.value);
 };
 
