@@ -488,11 +488,11 @@ const isLow = item.quantity > 0 && item.quantity <= item.minStock;
     <div class='models'>${modelSpans}</div>
 
     <div class="qty-control">
-      <button class="qty-btn minus" data-id="${id}">-</button>
-      <span class="${isLow ? 'low-count' : isOut? 'out-count' : 'stock-count'}">
+      <button class="qty-btn minus hidden" data-id="${id}">-</button>
+      QTY : <span class="${isLow ? 'low-count' : isOut? 'out-count' : 'stock-count'}">
         ${item.quantity}
       </span>
-      <button class="qty-btn plus" data-id="${id}">+</button>
+      <button class="qty-btn plus hidden" data-id="${id}">+</button>
     </div>
 
     <button class="edit-btn" data-id="${id}">Edit</button>

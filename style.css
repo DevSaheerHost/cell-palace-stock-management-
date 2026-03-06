@@ -378,6 +378,7 @@ header .low span{
   color: #fff;
   margin-right: 0;
   width: 100px;
+  min-width: fit-content;
   white-space: nowrap;
 }
 .form button.login{
