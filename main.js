@@ -959,6 +959,12 @@ window.addEventListener("scroll", () => {
 const createGizmosJobBtn = document.querySelector("#createGizmosJobBtn")
 
 createGizmosJobBtn.onclick = async () => {
+  if(!isUserauth()){
+  history.replaceState(null, null, "#auth");
+router();
+  return
+}
+
   const device = $("#device").value.trim()
   const complaint = $("#complaint").value.trim()
   const notes = $("#notes").value.trim()
@@ -987,7 +993,8 @@ createGizmosJobBtn.onclick = async () => {
   $("#complaint").value = ""
   $("#notes").value = ""
 
-  alert("Job created")
+  location.hash = "gizmos"
+router()
 
 }
 
