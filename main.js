@@ -635,9 +635,9 @@ function router(link) {
   showPage(hash);
   
   if (hash === 'gizmos' || hash==='create-gizmos') {
-  document.documentElement.style.setProperty('--accent', '#0909');
+  document.documentElement.style.setProperty('--accent', 'rgba(0, 0, 0, 0.82)');
 } else {
-  document.documentElement.style.setProperty('--accent', 'rgba(0, 112, 255, 0.82)');
+  document.documentElement.style.setProperty('--accent', 'rgba(28, 126, 126, 0.82)');
 }
 if (hash==='create-gizmos') {
   $('#bottomNav').classList.add('hidden')
