@@ -107,7 +107,9 @@
   font-style: italic;
 }
 
-
+:root{
+  --accent: rgba(0, 112, 255, 0.82);
+}
 
 *{
     padding: 0;
@@ -120,7 +122,7 @@ body{
   background: #F1F1F1;
 }
 main *{
-  transition: all 0.3s;
+  transition: all 0.3s ease-in-out;
   animation: fade 0.3s ease;
 }
 @keyframes fade {
@@ -132,6 +134,7 @@ main *{
 .flex-between{
     display: flex;
     align-items: center;justify-content: space-between;
+   padding-bottom: 1rem;
 }
 
 .list{
@@ -203,7 +206,7 @@ main *{
 }
 .list-item .stock-count{
   color: #fff;
-  background: #0070FF;
+  background: var(--accent);
   height: 30px;
   width: 30px;
   border-radius: 100px;
@@ -243,7 +246,7 @@ button.fab{
   height: 60px;
   width: 60px;
   border-radius: 100px;
-  background: #0070FF;
+  background: var(--accent);
   color: #fff;
   position: fixed;
   bottom: 2rem;
@@ -258,14 +261,15 @@ button.fab{
 }
 
 header{
-    background: #0070FF;
+    background: var(--accent);
     color: #fff;
     padding: 1rem;
     padding-bottom: 0;
     animation: none;
     position: sticky;
-    top: -60px;
+    top: -70px;
     z-index: 5;
+    backdrop-filter: blur(10px);
 }
 header * {
   animation: none;
@@ -374,7 +378,7 @@ header .low span{
 }
 .form button{
   margin-top: 2rem;
-  background: #0070FF;
+  background: var(--accent);
   color: #fff;
   margin-right: 0;
   width: 100px;
@@ -386,7 +390,7 @@ header .low span{
 }.form button.forgot{
   background: transparent;
   border: none;
-  color: #0070FF;
+  color: var(--accent);
   display: block;
 }
 .form .btn-flex{
@@ -450,7 +454,9 @@ header .low span{
 
 
 
-
+header, .bottom-nav{
+  transition: background 0.3s ease-in-out !important;
+}
 
 .bottom-nav-wraper{
   position: fixed;
@@ -468,7 +474,7 @@ header .low span{
   align-items: center;
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.81);
-  background: rgba(0, 112, 255, 0.82);
+  background: var(--accent);
   width: 80%;
   padding: 0.3rem;
   border-radius: 100px;
@@ -487,10 +493,15 @@ header .low span{
   padding: 0.5rem;
   color: #fff;
 }
+.bottom-nav span.gizmos{
+  font-weight: 600;
+  font-size: 20px;
+}
 
 .bottom-nav span.active{
   position: relative;
-  color: #0070FF;
+  color: var(--accent);
+  color: var(--accent);
 }
 
 .bottom-nav span.active::after{
@@ -550,7 +561,7 @@ select{
 .suggestions div .qty{
   width: max-content;
   padding: 0.1rem 0.5rem;
-  background: #0070FF;
+  background: var(--accent);
     color: #fff;
   border-radius: 7px;
   margin: auto;
@@ -610,7 +621,7 @@ select{
 }
 .job-card .name{
   font-weight: 600;
-  color: #0070FF;
+  color: var(--accent);
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -744,6 +755,86 @@ button.skip-auth a{
 
 }
 
+
+
+
+
+
+.date-splitter{
+  margin-top:20px;
+  margin-bottom:10px;
+  font-weight:600;
+  font-size:14px;
+  opacity:0.7;
+  
+  position: sticky;
+  top: 3rem;
+}
+button.create_new_gizmos{
+  background: #fff;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.gizmos.flex-between{
+  display: flex;
+  align-items: center;
+  margin: 0;
+  margin-bottom: 0;
+  padding: 0;
+  position: sticky;
+  top: 0px;
+  transition:background .25s ease, backdrop-filter .25s ease;
+  padding: 1rem;
+}
+
+.gizmos.flex-between.scrolled{
+  background: var(--accent);
+  backdrop-filter:blur(12px) saturate(160%);
+  border:1px solid rgba(255,255,255,0.3);
+  border-top: none;
+  
+  color: #fff;
+}
+
+#gizmos-list{
+  margin-bottom: 5rem;
+}
+
+
+
+
+.create-job-inputs{
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.create-job-inputs input,
+.create-job-inputs textarea{
+  padding:14px;
+  border-radius:10px;
+  background:#f1f1f1;
+  font-size:14px;
+  border:1px solid #C3C3C3;
+
+}
+
+.create-job-inputs textarea{
+  min-height:90px;
+  resize:none;
+}
+
+#createGizmosJobBtn{
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background: var(--accent);
+  color:white;
+  font-weight:600;
+}
+
 .hidden{
     display: none !important;
 }
+

@@ -152,11 +152,73 @@
 </main>
 
 
-<main class="page history" id="history">
-  <div id="jobcontainer">
-    <h2>Works</h2>
+<main class="page history hidden" id="history">
+  
+    <header>
+  <div class="flex-between">
+    <h2>Work History</h2>
+    <button id="logoutBtn">Logout</button>
   </div>
+</header>
+
+  <div id="jobcontainer"></div>
 </main>
+
+
+
+
+
+
+
+<main class="page gizmos hidden" id="gizmos">
+      <header>
+  <div class="flex-between">
+    <h2>Gizmos Works</h2>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+
+<div class="gizmos flex-between create-flex">
+<div>
+    <p id="totJobEl">Total Jobs: 0</p>
+  <p id="displayJobEl">Total Display: 0</p>
+</div>
+    <button class="create_new_gizmos" id="open_gizmos_create_page">
+    Create New
+  </button>
+</div>
+<div class="list" id="gizmos-list"></div>
+
+
+</main>
+
+<main class="page create-gizmos hidden" id="create-gizmos">
+        <header>
+  <div class="flex-between">
+    <h2>Create Gizmos Job</h2>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+
+
+<div class="create-job-inputs">
+
+  <input id="device" type="text" placeholder="Device / Model (eg: Poco X2)">
+
+  <input id="complaint" type="text" placeholder="Complaint (eg: Dead / No Display)">
+
+  <textarea id="notes" placeholder="Notes (optional)"></textarea>
+
+  <button id="createGizmosJobBtn">
+    Create Job
+  </button>
+
+</div>
+</main>
+
+
 
 <div class="bottom-nav-wraper hidden" id="bottomNavContainer">
   
@@ -184,6 +246,7 @@
      <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
     </svg>
   </span>
+  <span class="gizmos" data-link="gizmos">GS</span>
 </nav>
 </div>
 

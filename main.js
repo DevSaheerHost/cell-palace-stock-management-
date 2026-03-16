@@ -44,12 +44,13 @@ const bottomNavs = document.querySelectorAll('#bottomNav span')
 const authBox = document.getElementById("authBox");
 const dashboard = document.getElementById("dashboard");
 const STOCK_CACHE_KEY = "cp_stock_cache_v1";
+const GIZMOS_CACHE_KEY = 'cp_gizmos_cache_v1';
 let visibleCount = 100;
 let filteredStock = [];
 let currentFilter = "all"; // "all" | "low"
 let editingId = null;
 
-
+const $=(s)=>document.querySelector(s)
 
 document.getElementById("registerBtn").onclick = async () => {
   try {
@@ -628,11 +629,21 @@ function showPage(pageId) {
 
 // hash change listener
 
-function router() {
+function router(link) {
   
   const hash = window.location.hash.replace("#", "") || "home";
   showPage(hash);
   
+  if (hash === 'gizmos' || hash==='create-gizmos') {
+  document.documentElement.style.setProperty('--accent', '#0909');
+} else {
+  document.documentElement.style.setProperty('--accent', 'rgba(0, 112, 255, 0.82)');
+}
+if (hash==='create-gizmos') {
+  $('#bottomNav').classList.add('hidden')
+}else{
+  $('#bottomNav').classList.remove('hidden')
+}
 }
 
 window.addEventListener("hashchange", router);
@@ -698,7 +709,7 @@ bottomNavs.forEach(n=>{
     e.currentTarget.classList.add('active')
   // location.replace(`/#${link}`)
   history.replaceState(null, null, `#${link}`)
-  router()
+  router(link)
   }
 });
 
@@ -806,3 +817,186 @@ const showJobsToUI=job=>{
   jobcontainer.innerHTML+=getJobUI(job)
  //console.log(job)
 }
+
+
+
+
+
+
+
+// Gizmos codes
+
+const formatTime = (timestamp) => {
+
+  const d = new Date(timestamp)
+
+  const date = d.toLocaleDateString("en-GB")
+
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  })
+
+  return `${date}, ${time}`
+}
+
+
+// List splitter Header helper
+const getDateLabel = (dateKey) => {
+
+  const today = new Date()
+  const yesterday = new Date()
+  yesterday.setDate(today.getDate() - 1)
+
+  const format = d => d.toLocaleDateString("en-GB").replaceAll("/", "-")
+
+  if (dateKey === format(today)) return "Today"
+  if (dateKey === format(yesterday)) return "Yesterday"
+
+  return dateKey
+}
+
+const renderGizmos = (jobs) => {
+
+let totalJobCount = 0
+let totalDisplayCount = 0
+
+const displayKeywords = ["LCD","LED","DISPLAY","COMBO"]
+
+const list = document.querySelector("#gizmos-list")
+list.innerHTML = ""
+
+const sortedDates = Object.keys(jobs).sort().reverse()
+
+sortedDates.forEach(date => {
+
+  const header = document.createElement("div")
+  header.className = "date-splitter"
+  header.textContent = getDateLabel(date)
+
+  list.appendChild(header)
+
+  Object.entries(jobs[date]).forEach(([id, job]) => {
+
+    totalJobCount++
+
+    const complaintText = (job.complaint || "").toUpperCase()
+
+    if(displayKeywords.some(word => complaintText.includes(word))){
+      totalDisplayCount++
+    }
+
+    const card = document.createElement("div")
+    card.className = "job-card"
+
+    card.innerHTML = `
+      <h3>${job.device}</h3>
+      <p><b>Complaint:</b> ${job.complaint}</p>
+      <p><b>Notes:</b> ${job.notes || ''}</p>
+    `
+
+    list.appendChild(card)
+
+  })
+
+})
+
+document.querySelector('#totJobEl').textContent =
+`Total Jobs : ${totalJobCount}`
+
+document.querySelector('#displayJobEl').textContent =
+`Display : ${totalDisplayCount}`
+
+}
+
+
+const loadGizmosWorks = () => {
+  const listContainer = document.querySelector('#gizmos-list')
+  
+  
+  let allJobs = []
+  onValue(ref(db, "gizmos/jobs"), snapshot => {
+  allJobs = snapshot.val() || {};
+  // Update UI
+  renderGizmos(allJobs);
+
+  // Save fresh copy to localStorage
+  localStorage.setItem(
+    GIZMOS_CACHE_KEY,
+    JSON.stringify(allJobs)
+  );
+
+});
+}
+
+
+
+
+loadGizmosWorks()
+
+
+  
+  
+
+
+// gizmos scroll effect
+const header = document.querySelector(".gizmos.flex-between")
+
+window.addEventListener("scroll", () => {
+
+  if (window.scrollY > 70){
+    header.classList.add("scrolled")
+  }else{
+    header.classList.remove("scrolled")
+  }
+
+})
+
+
+
+// create gizmos job
+const createGizmosJobBtn = document.querySelector("#createGizmosJobBtn")
+
+createGizmosJobBtn.onclick = async () => {
+  const device = $("#device").value.trim()
+  const complaint = $("#complaint").value.trim()
+  const notes = $("#notes").value.trim()
+
+  if(!device || !complaint){
+    alert("Device and complaint required")
+    return
+  }
+
+  const now = new Date()
+
+  const dateKey = now
+    .toLocaleDateString("en-GB")
+    .replaceAll("/", "-")
+
+  await push(ref(db, `gizmos/jobs/${dateKey}`), {
+
+    device,
+    complaint,
+    notes,
+    createdAt: Date.now()
+
+  })
+
+  $("#device").value = ""
+  $("#complaint").value = ""
+  $("#notes").value = ""
+
+  alert("Job created")
+
+}
+
+
+document.querySelector('#open_gizmos_create_page').onclick=()=>{
+  location.hash="create-gizmos"
+  router()
+}
+
+
+
+
