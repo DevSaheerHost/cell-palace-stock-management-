@@ -499,11 +499,13 @@ header, .bottom-nav{
   font-size: 20px;
 }
 
+
+
 .bottom-nav span.active{
   position: relative;
   color: var(--accent);
-  color: var(--accent);
 }
+
 
 .bottom-nav span.active::after{
   content: "";
@@ -521,8 +523,8 @@ header, .bottom-nav{
 }
 @keyframes popUp {
   from{
-    width: 0px;
-    height: 0px;
+    width: 20px;
+    height: 20px;
   }
 }
 
