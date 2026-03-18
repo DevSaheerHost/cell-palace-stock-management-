@@ -45,6 +45,7 @@ const authBox = document.getElementById("authBox");
 const dashboard = document.getElementById("dashboard");
 const STOCK_CACHE_KEY = "cp_stock_cache_v1";
 const GIZMOS_CACHE_KEY = 'cp_gizmos_cache_v1';
+const TECHNICIAN_NAME_KEY = 'technician_name'
 let visibleCount = 100;
 let filteredStock = [];
 let currentFilter = "all"; // "all" | "low"
@@ -965,6 +966,15 @@ router();
   return
 }
 
+const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
+!technicianName?(()=>{
+  const name = prompt('Enter Your Name')
+  !name && (()=>{
+    throw new Error('Sorry')
+  })()
+  localStorage.setItem(TECHNICIAN_NAME_KEY, name)
+})():''
+
   const device = $("#device").value.trim()
   const complaint = $("#complaint").value.trim()
   const notes = $("#notes").value.trim()
@@ -985,6 +995,7 @@ router();
     device,
     complaint,
     notes,
+    technician: technicianName,
     createdAt: Date.now()
 
   })
