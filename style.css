@@ -109,7 +109,32 @@
 
 :root{
   --accent: rgba(0, 112, 255, 0.82);
-  --accent: rgba(28, 126, 126, 0.82);
+  --accent: #0BA2FF;
+  
+
+  /* Primary Colors */
+  --color-primary: #0BA2FF;
+  --color-secondary: #2F2F2F;
+
+  /* Background & Surface */
+  --color-background: #F5F7FA;
+  --color-card: #FFFFFF;
+
+  /* Status Colors */
+  --color-success: #00C896;
+  --color-warning: #FFB020;
+  --color-danger: #FF4D4F;
+
+  /* Text Colors */
+  --color-text-primary: #2F2F2F;
+  --color-text-secondary: #6B7280;
+
+  /* Borders & UI */
+  --color-border: #E5E7EB;
+
+  /* Shadows */
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+
 }
 
 *{
@@ -120,8 +145,30 @@
     font-family: "Poppins", sans-serif;
 }
 body{
-  background: #F1F1F1;
+  background: var(--color-background);
+  color: var(--color-text-primary);
 }
+
+
+
+.card {
+  background: var(--color-card);
+  box-shadow: var(--shadow-card);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.low-stock {
+  color: var(--color-warning);
+}
+
+.out-stock {
+  color: var(--color-danger);
+}
+
 main *{
   transition: all 0.3s ease-in-out;
   animation: fade 0.3s ease;
@@ -263,7 +310,7 @@ button.fab{
 
 header{
     background: var(--accent);
-    color: #fff;
+    /* color: #fff; */
     padding: 1rem;
     padding-bottom: 0;
     animation: none;
@@ -271,6 +318,24 @@ header{
     top: -70px;
     z-index: 5;
     backdrop-filter: blur(10px);
+}
+
+header {
+  background: var(--color-card); /* #FFFFFF */
+  border-bottom: 1px solid var(--color-border);
+}
+
+header {
+  background: linear-gradient(
+    to bottom,
+    #ffffff,
+    #f5f7fa
+  );
+  border-bottom: 1px solid var(--color-border);
+}
+header {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
 }
 header * {
   animation: none;
@@ -347,6 +412,40 @@ header .table div.active span{
       box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.0);
 
 }
+
+
+
+header .table div.active{
+  transform: translateY(0px);
+  font-weight: 600;
+  border-radius: 7px 7px 0 0;
+
+  background: rgba(11, 162, 255, 0.1); /* light primary */
+  border-top: 2px solid var(--color-primary);
+
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.08);
+}
+
+header .table div.active::after{
+  height: 3px;
+  background: var(--color-primary);
+  bottom: 0;
+  border-radius: 7px 7px 0 0;
+}
+
+header .table div.active span{
+  background: var(--color-primary);
+  color: #fff;
+  border: 2px solid var(--color-card);
+}
+
+header .table div{
+  color: var(--color-text-secondary);
+}
+
+header .table div.active{
+  color: var(--color-primary);
+}
 header .low{
   position: relative;
 }
@@ -354,7 +453,8 @@ header .low span{
   position: absolute;
   top: -0.5rem;
   right: 0;
-  background: red;
+  background: var(--color-danger);
+  color: #fff;
   border-radius: 100px;
   height: 20px;
   width: 20px;
@@ -476,6 +576,8 @@ header, .bottom-nav{
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.81);
   background: var(--accent);
+    background: rgba(11, 162, 255, 0.1); /* light primary */
+
   width: 80%;
   padding: 0.3rem;
   border-radius: 100px;
@@ -493,6 +595,7 @@ header, .bottom-nav{
   justify-content: center;
   padding: 0.5rem;
   color: #fff;
+  color: #393636;
 }
 .bottom-nav span.gizmos{
   font-weight: 600;
@@ -504,12 +607,15 @@ header, .bottom-nav{
 .bottom-nav span.active{
   position: relative;
   color: var(--accent);
+  color: #fff;
 }
 
 
 .bottom-nav span.active::after{
   content: "";
   background: #fff;
+  background: rgba(11, 162, 255, 0.61); /* light primary */
+
   width: 60px;
   height: 40px;
   position: absolute;
@@ -771,12 +877,19 @@ button.skip-auth a{
   opacity:0.7;
   
   position: sticky;
-  top: 3rem;
+  top: 3.8rem;
+  background: #fff;
+  width: max-content;
+  max-height: fit-content;
+  padding: 0 2px;
+  border-radius: 7px;
 }
 button.create_new_gizmos{
   background: #fff;
-  color: var(--accent);
-  border-color: var(--accent);
+    background: rgba(11, 162, 255, 0.1); /* light primary */
+
+  color: var(--color-primary);
+  border-color: rgba(11, 162, 255, 0.2);
 }
 .gizmos.flex-between{
   display: flex;
@@ -795,8 +908,8 @@ button.create_new_gizmos{
   backdrop-filter:blur(12px) saturate(160%);
   border:1px solid rgba(255,255,255,0.3);
   border-top: none;
-  
-  color: #fff;
+  background: var(--color-card); /* #FFFFFF */
+  border-bottom: 1px solid var(--color-border)
 }
 
 #gizmos-list{
