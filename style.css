@@ -115,6 +115,7 @@
   /* Primary Colors */
   --color-primary: #0BA2FF;
   --color-secondary: #2F2F2F;
+  --light-primary: rgba(11, 162, 255, 0.1);
 
   /* Background & Surface */
   --color-background: #F5F7FA;
@@ -124,6 +125,11 @@
   --color-success: #00C896;
   --color-warning: #FFB020;
   --color-danger: #FF4D4F;
+  
+  /* Status Colors Secondary (dim / soft UI) */
+  --color-success-secondary: #D9F5EE;
+  --color-warning-secondary: #FFF4D6;
+  --color-danger-secondary: #FFE1E1;
 
   /* Text Colors */
   --color-text-primary: #2F2F2F;
@@ -213,6 +219,8 @@ main *{
   color: rgba(121, 121, 121, 1);
   border-top: 1px solid #FFFFFF;
   border-left: 1px solid #fff;
+  
+  background: var(--light-primary);
 }
 
 .list-item .low , .list-item .out{
@@ -486,9 +494,13 @@ header .low span{
   min-width: fit-content;
   white-space: nowrap;
 }
-.form button.login{
-  
-}.form button.forgot{
+#logoutBtn{
+  color: var(--color-warning);
+  background: var(--color-warning-secondary);
+  border: 1px solid var(--color-warning);
+  padding: 0.3rem 0.5rem;
+}
+.form button.forgot{
   background: transparent;
   border: none;
   color: var(--accent);
@@ -545,7 +557,10 @@ header .low span{
   border: none;
   border-radius: 6px;
   background: #444;
-  color: #fff;
+  background: rgba(237, 237, 237, 1);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
   font-size: 12px;
   display: flex;
@@ -558,7 +573,36 @@ header .low span{
 header, .bottom-nav{
   transition: background 0.3s ease-in-out !important;
 }
+.bottom-nav.init{
+  animation: navbarInit 0.3s ease-in-out;
+}
+.bottom-nav:active{
+  animation: navbarBuble 0.5s ease-in-out;
+}
+@keyframes navbarInit{
+  0%{
+    transform: scaleX(0.5);
+  }
+  40%{
+    transform: scaleX(1.05);
+  }
+  70%{
+    transform: scaleX(0.9);
+  }
+}
 
+@keyframes navbarBuble {
+  20%{
+    transform: scaleX(0.97);
+  }
+  50%{
+    transform: scaleX(1.1);
+  }
+  70%{
+    transform: scaleX(0.97);
+
+  }
+}
 .bottom-nav-wraper{
   position: fixed;
   width: 100%;
@@ -571,6 +615,7 @@ header, .bottom-nav{
   z-index: 10;
 }
 .bottom-nav{
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -626,11 +671,19 @@ header, .bottom-nav{
   z-index: -1;
   animation: popUp 0.3s ease;
   scale: 1;
+  
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 5px 5px rgba(255, 255, 255, 0.56) inset;
 }
 @keyframes popUp {
-  from{
+  0%{
     width: 20px;
     height: 20px;
+  }
+  35%{
+    width: 65px;
+  }70%{
+    width: 40px;
   }
 }
 
@@ -877,7 +930,7 @@ button.skip-auth a{
   opacity:0.7;
   
   position: sticky;
-  top: 3.8rem;
+  top: 5.3rem;
   background: #fff;
   width: max-content;
   max-height: fit-content;
@@ -948,6 +1001,13 @@ button.create_new_gizmos{
   background: var(--accent);
   color:white;
   font-weight:600;
+}
+
+.workAmountElement{
+  color: var(--color-text-secondary);
+}
+.workAmountElement .amount{
+  color: var(--color-warning);
 }
 
 .hidden{

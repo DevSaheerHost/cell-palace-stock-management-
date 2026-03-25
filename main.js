@@ -701,9 +701,15 @@ if ("serviceWorker" in navigator) {
 
 // bottom nav
 
+const nav = document.querySelector('.bottom-nav');
+
+window.addEventListener('load', () => {
+  nav.classList.add('init');
+});
 
 bottomNavs.forEach(n=>{
   n.onclick = (e)=>{
+    nav.classList.remove('init')
     const link = e.currentTarget.dataset.link;
    //location.hash = link
     bottomNavs.forEach(e=>e.classList.remove('active'))
@@ -862,8 +868,13 @@ const renderGizmos = (jobs) => {
 
 let totalJobCount = 0
 let totalDisplayCount = 0
+let totalMotherboardCount =0
+let motherboardPrice = 300
+let displayPrice = 100
 
 const displayKeywords = ["LCD","LED","DISPLAY","COMBO"]
+const motherBoardKeywords= ['MOTHER BOARD', 'MOTHERBOARD', 'BOARD', 'BACKLIGHT']
+const icKeywords = ['CPU', 'EMMC', 'POERIC', 'IC']
 
 const list = document.querySelector("#gizmos-list")
 list.innerHTML = ""
@@ -886,6 +897,8 @@ sortedDates.forEach(date => {
 
     if(displayKeywords.some(word => complaintText.includes(word))){
       totalDisplayCount++
+    } else if (motherBoardKeywords.some(word=>complaintText.includes(word))) {
+      totalMotherboardCount++
     }
 
     const card = document.createElement("div")
@@ -903,11 +916,18 @@ sortedDates.forEach(date => {
 
 })
 
-document.querySelector('#totJobEl').textContent =
-`Total Jobs : ${totalJobCount}`
+const totalDisplayPrice = displayPrice*totalDisplayCount;
+const totalMotherboardPrice = motherboardPrice*totalMotherboardCount;
 
-document.querySelector('#displayJobEl').textContent =
-`Display : ${totalDisplayCount}`
+const totalPrice = totalDisplayPrice+totalMotherboardPrice;
+document.querySelector('#totJobEl').innerHTML =
+`<div class='workAmountElement'>Total Jobs : ${totalJobCount} - <span class='amount'>${totalPrice.toLocaleString()}</span></div>`
+
+document.querySelector('#displayJobEl').innerHTML =
+  `<div class='workAmountElement'>Display : ${totalDisplayCount} - <span class='amount'>₹${totalDisplayPrice.toLocaleString()}</span></div>`;
+  
+document.querySelector('#motherboardJobEl').innerHTML=
+  `<div class='workAmountElement'>Motherboard : ${totalMotherboardCount} - <span class='amount'>₹${totalMotherboardPrice.toLocaleString()}</span></div>`
 
 }
 
@@ -1014,6 +1034,8 @@ document.querySelector('#open_gizmos_create_page').onclick=()=>{
   location.hash="create-gizmos"
   router()
 }
+
+
 
 
 
