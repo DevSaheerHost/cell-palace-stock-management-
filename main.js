@@ -269,7 +269,6 @@ jobPartInput.addEventListener("input", () => {
     item.name.toLowerCase().includes(value) ||
     item.models.toLowerCase().includes(value)
   );
-
   filtered.forEach(item => {
     const div = document.createElement("div");
     if (item.quantity === 0) {
@@ -473,6 +472,7 @@ document.getElementById("totalCount").innerText = `${totalItems}, Number of spar
   if (searchTerm) visibleCount = filteredStock.length;
 
   // 🔢 Render limited
+  console.log(filteredStock)
   filteredStock.slice(0, visibleCount).forEach(([id, item]) => {
 
     const models = Object.keys(item.compatibleModels || {});
@@ -510,7 +510,34 @@ const isLow = item.quantity > 0 && item.quantity <= item.minStock;
   </div>
 `;
   });
+  
+if (filteredStock.length === 0) {
+  stockList.innerHTML = `
+    <div class="empty-state">
+      <p class="noProductText">No matching products found</p>
+      <p class="subText">Try a different name or clear filters</p>
 
+      <div class="empty-actions">
+        <button class="btn secondary" id="clearFiltersBtn">Clear Filters</button>
+        <button class="btn primary" id="addProductBtn">+ Add Product</button>
+      </div>
+    </div>
+  `;
+
+  // actions
+  document.getElementById('clearFiltersBtn').onclick = () => {
+    // reset your search/filter logic
+    console.log('clear filters');
+  };
+
+  document.getElementById('addProductBtn').onclick = () => {
+    // open add product UI / modal
+    history.replaceState(null, null, "#add-item");
+router();
+document.querySelector('#partName').value=$('#stockSearch').value
+    
+  };
+}
 }
 
 

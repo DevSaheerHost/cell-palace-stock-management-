@@ -1010,6 +1010,53 @@ button.create_new_gizmos{
   color: var(--color-warning);
 }
 
+.noProductText{
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.empty-state{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:60vh;
+  text-align:center;
+  gap:0.5rem;
+}
+
+.noProductText{
+  font-size:1.1rem;
+  font-weight:600;
+}
+
+.subText{
+  font-size:0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.empty-actions{
+  margin-top:1rem;
+  display:flex;
+  gap:0.5rem;
+}
+
+.btn{
+  padding:0.5rem 1rem;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background: var(--color-primary);
+  color:white;
+}
+
+.btn.secondary{
+  background:#eee;
+}
+
 .hidden{
     display: none !important;
 }
