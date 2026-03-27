@@ -16,7 +16,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 
-<meta name="theme-color" content="#rgba(7, 9, 26, 0.78)">
+<meta name="theme-color" content="#0070FF">
 </head>
 <body>
 
@@ -255,5 +255,5 @@
 
   <script type="module" src="main.js"></script>
   <script defer src="animations.js"></script>
-</body>
+<script src="https://replit-cdn.com/replit-pill/replit-pill.global.js" data-referral-code="q2qsda5ce3x0" data-repl-id="68c76355-5454-48a5-9f8c-d84b47ca1c01"></script></body>
 </html>

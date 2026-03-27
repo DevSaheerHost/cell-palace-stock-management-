@@ -896,6 +896,7 @@ const renderGizmos = (jobs) => {
 let totalJobCount = 0
 let totalDisplayCount = 0
 let totalMotherboardCount =0
+let totalIphoneBackGlass=0
 let motherboardPrice = 300
 let displayPrice = 100
 
