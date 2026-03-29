@@ -45,7 +45,8 @@ const authBox = document.getElementById("authBox");
 const dashboard = document.getElementById("dashboard");
 const STOCK_CACHE_KEY = "cp_stock_cache_v1";
 const GIZMOS_CACHE_KEY = 'cp_gizmos_cache_v1';
-const TECHNICIAN_NAME_KEY = 'technician_name'
+const TECHNICIAN_NAME_KEY = 'technician_name';
+const USER_NAME_KEY = 'user_name'
 let visibleCount = 100;
 let filteredStock = [];
 let currentFilter = "all"; // "all" | "low"
@@ -169,6 +170,25 @@ document.getElementById("forgotBtn").onclick = async () => {
 
 
 
+const askUserName = () => {
+  let name = localStorage.getItem(USER_NAME_KEY);
+
+  if (name && name.trim().length >= 3) return name;
+
+  const input = prompt('Enter your name');
+
+  if (!input) return null;
+
+  name = input.trim();
+
+  if (name.length < 3) return null;
+
+  localStorage.setItem(USER_NAME_KEY, name);
+
+  return name;
+};
+
+
 
 
 // Add / update stock
@@ -187,6 +207,16 @@ if(!isUserauth()){
 router();
   return
 }
+const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
+!technicianName?(()=>{
+  const name = prompt('Enter Your Name')
+  !name && (()=>{
+    throw new Error('Sorry')
+  })()
+  localStorage.setItem(TECHNICIAN_NAME_KEY, name)
+})():''
+
+
   const name = partName.value.trim();
   const modelInput = partModel.value.trim(); // comma separated
   const qty = Number(partQty.value);
@@ -218,7 +248,8 @@ router();
     quantity: qty,
     cost,
     minStock: min,
-    updatedAt: Date.now()
+    updatedAt: Date.now(),
+    editedBy: localStorage.getItem(TECHNICIAN_NAME_KEY)
   });
   history.back()
   editingId = null;
@@ -305,6 +336,17 @@ if(!isUserauth()){
 router();
   return
 }
+
+
+const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
+!technicianName?(()=>{
+  const name = prompt('Enter Your Name')
+  !name && (()=>{
+    throw new Error('Name is required')
+  })()
+  localStorage.setItem(TECHNICIAN_NAME_KEY, name)
+})():''
+
   //const partId = jobPartSelect.value;
   const partId = document.getElementById("selectedPartId").value;
   const usedQty = Number(document.getElementById("jobQty").value);
@@ -327,7 +369,8 @@ router();
     device: document.getElementById("jobModel").value,
     usedPart: partId,
     qty: usedQty,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    createdBy: localStorage.getItem(TECHNICIAN_NAME_KEY)
   });
 
   // Log stock movement
@@ -335,9 +378,13 @@ router();
     partId,
     change: -usedQty,
     type: "JOB_USE",
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    createdBy: localStorage.getItem(TECHNICIAN_NAME_KEY)
   });
 
+
+history.replaceState(null, null, "#home");
+router();
 };
 
 
@@ -472,7 +519,7 @@ document.getElementById("totalCount").innerText = `${totalItems}, Number of spar
   if (searchTerm) visibleCount = filteredStock.length;
 
   // 🔢 Render limited
-  console.log(filteredStock)
+ // console.log(filteredStock)
   filteredStock.slice(0, visibleCount).forEach(([id, item]) => {
 
     const models = Object.keys(item.compatibleModels || {});
@@ -528,6 +575,7 @@ if (filteredStock.length === 0) {
   document.getElementById('clearFiltersBtn').onclick = () => {
     // reset your search/filter logic
     console.log('clear filters');
+    $('#clearFilter').click()
   };
 
   document.getElementById('addProductBtn').onclick = () => {
@@ -798,7 +846,7 @@ function saveToFirebase(errorData) {
 
 const getJobUI=j=>{
   const date = new Date(j.createdAt);
-console.log(date.toLocaleString());
+
   return`
   <div class='job-card'>
   <p class='name'>
@@ -842,7 +890,7 @@ async function getAllJobs() {
 
 
 getAllJobs().then(jobs => {
-  console.log(jobs);
+  
   jobs.forEach(j=>showJobsToUI(j))
 });
 
@@ -936,6 +984,7 @@ sortedDates.forEach(date => {
       <h3>${job.device}</h3>
       <p><b>Complaint:</b> ${job.complaint}</p>
       <p><b>Notes:</b> ${job.notes || ''}</p>
+      <p class='technician'><b></b> ${job.technician || ''}</p>
     `
 
     list.appendChild(card)
@@ -1018,7 +1067,7 @@ const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
 !technicianName?(()=>{
   const name = prompt('Enter Your Name')
   !name && (()=>{
-    throw new Error('Sorry')
+    throw new Error('Name is required')
   })()
   localStorage.setItem(TECHNICIAN_NAME_KEY, name)
 })():''
@@ -1043,7 +1092,7 @@ const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
     device,
     complaint,
     notes,
-    technician: technicianName,
+    technician: localStorage.getItem(TECHNICIAN_NAME_KEY),
     createdAt: Date.now()
 
   })
