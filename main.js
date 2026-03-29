@@ -54,6 +54,141 @@ let editingId = null;
 
 const $=(s)=>document.querySelector(s)
 
+/** In-app alert / prompt (replaces window.alert / prompt) */
+function showAlert(message, { title = '', variant = 'default' } = {}) {
+  return new Promise((resolve) => {
+    const root = document.getElementById('app-modal-root');
+    const sheet = document.getElementById('modalSheet');
+    const titleEl = document.getElementById('modalTitle');
+    const messageEl = document.getElementById('modalMessage');
+    const inputWrap = document.getElementById('modalInputWrap');
+    const btnSecondary = document.getElementById('modalBtnSecondary');
+    const btnPrimary = document.getElementById('modalBtnPrimary');
+    const backdrop = document.getElementById('modalBackdrop');
+
+    sheet.className =
+      'modal-sheet glass-sheet' +
+      (variant === 'error' ? ' glass-sheet--error' : variant === 'success' ? ' glass-sheet--success' : '');
+    const autoTitle =
+      variant === 'error' ? 'Something went wrong' : variant === 'success' ? 'Done' : 'Notice';
+    titleEl.textContent = title || autoTitle;
+    messageEl.textContent = message;
+    inputWrap.classList.add('hidden');
+    btnSecondary.classList.add('hidden');
+    btnPrimary.textContent = 'OK';
+
+    const finish = () => {
+      root.classList.add('hidden');
+      root.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      backdrop.onclick = null;
+      btnPrimary.onclick = null;
+      document.removeEventListener('keydown', onKey);
+      resolve();
+    };
+
+    function onKey(e) {
+      if (e.key === 'Escape' || e.key === 'Enter') finish();
+    }
+
+    root.classList.remove('hidden');
+    root.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey);
+    backdrop.onclick = finish;
+    btnPrimary.onclick = finish;
+    btnPrimary.focus();
+  });
+}
+
+function showPrompt(message, {
+  title = 'Enter value',
+  placeholder = '',
+  defaultValue = '',
+  confirmText = 'OK',
+  cancelText = 'Cancel'
+} = {}) {
+  return new Promise((resolve) => {
+    const root = document.getElementById('app-modal-root');
+    const sheet = document.getElementById('modalSheet');
+    const titleEl = document.getElementById('modalTitle');
+    const messageEl = document.getElementById('modalMessage');
+    const inputWrap = document.getElementById('modalInputWrap');
+    const inputEl = document.getElementById('modalInput');
+    const btnSecondary = document.getElementById('modalBtnSecondary');
+    const btnPrimary = document.getElementById('modalBtnPrimary');
+    const backdrop = document.getElementById('modalBackdrop');
+
+    sheet.className = 'modal-sheet glass-sheet';
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    inputWrap.classList.remove('hidden');
+    btnSecondary.classList.remove('hidden');
+    btnPrimary.textContent = confirmText;
+    btnSecondary.textContent = cancelText;
+    inputEl.placeholder = placeholder;
+    inputEl.value = defaultValue;
+
+    const cleanup = () => {
+      root.classList.add('hidden');
+      root.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      backdrop.onclick = null;
+      btnPrimary.onclick = null;
+      btnSecondary.onclick = null;
+      inputEl.onkeydown = null;
+      document.removeEventListener('keydown', onKey);
+    };
+
+    const ok = () => {
+      cleanup();
+      resolve(inputEl.value.trim());
+    };
+
+    const cancel = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    function onKey(e) {
+      if (e.key === 'Escape') cancel();
+    }
+
+    root.classList.remove('hidden');
+    root.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey);
+    backdrop.onclick = cancel;
+    btnSecondary.onclick = cancel;
+    btnPrimary.onclick = ok;
+    inputEl.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        ok();
+      }
+    };
+    setTimeout(() => {
+      inputEl.focus();
+      inputEl.select();
+    }, 30);
+  });
+}
+
+async function ensureTechnicianName() {
+  const existing = localStorage.getItem(TECHNICIAN_NAME_KEY);
+  if (existing && existing.trim()) return existing.trim();
+  const entered = await showPrompt('This name is saved with jobs and stock changes.', {
+    title: 'Enter your name',
+    placeholder: 'Your name',
+    confirmText: 'Continue',
+    cancelText: 'Cancel'
+  });
+  if (!entered || !entered.trim()) return null;
+  const name = entered.trim();
+  localStorage.setItem(TECHNICIAN_NAME_KEY, name);
+  return name;
+}
+
 document.getElementById("registerBtn").onclick = async () => {
   try {
     const userCred = await createUserWithEmailAndPassword(
@@ -170,12 +305,17 @@ document.getElementById("forgotBtn").onclick = async () => {
 
 
 
-const askUserName = () => {
+const askUserName = async () => {
   let name = localStorage.getItem(USER_NAME_KEY);
 
   if (name && name.trim().length >= 3) return name;
 
-  const input = prompt('Enter your name');
+  const input = await showPrompt('We use this to personalize your experience.', {
+    title: 'Enter your name',
+    placeholder: 'Your name',
+    confirmText: 'Save',
+    cancelText: 'Skip'
+  });
 
   if (!input) return null;
 
@@ -207,15 +347,8 @@ if(!isUserauth()){
 router();
   return
 }
-const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
-!technicianName?(()=>{
-  const name = prompt('Enter Your Name')
-  !name && (()=>{
-    throw new Error('Sorry')
-  })()
-  localStorage.setItem(TECHNICIAN_NAME_KEY, name)
-})():''
-
+  const tech = await ensureTechnicianName();
+  if (!tech) return;
 
   const name = partName.value.trim();
   const modelInput = partModel.value.trim(); // comma separated
@@ -224,7 +357,10 @@ const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
   const min = Number(minStock.value);
 
   if(!name || !modelInput || !qty){
-    alert("Fill required fields");
+    await showAlert('Please fill in part name, model, and quantity.', {
+      title: 'Missing fields',
+      variant: 'error'
+    });
     return;
   }
 
@@ -337,15 +473,8 @@ router();
   return
 }
 
-
-const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
-!technicianName?(()=>{
-  const name = prompt('Enter Your Name')
-  !name && (()=>{
-    throw new Error('Name is required')
-  })()
-  localStorage.setItem(TECHNICIAN_NAME_KEY, name)
-})():''
+  const tech = await ensureTechnicianName();
+  if (!tech) return;
 
   //const partId = jobPartSelect.value;
   const partId = document.getElementById("selectedPartId").value;
@@ -354,7 +483,10 @@ const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
   const stockData = stockSnap.val();
 
   if(!stockData || stockData.quantity < usedQty){
-    alert("Not enough stock");
+    await showAlert('Not enough stock for this part. Choose a lower quantity or restock first.', {
+      title: 'Insufficient stock',
+      variant: 'error'
+    });
     return;
   }
 
@@ -836,7 +968,10 @@ function logError(data) {
 // send errors to db
 function saveToFirebase(errorData) {
   push(ref(db, `logs/errors`), errorData);
-  alert('Error : '+ errorData.message)
+  showAlert(String(errorData.message || 'Unknown error'), {
+    title: 'Error',
+    variant: 'error'
+  });
 }
 
 
@@ -978,7 +1113,7 @@ sortedDates.forEach(date => {
     }
 
     const card = document.createElement("div")
-    card.className = "job-card"
+    card.className = "job-card gizmo-card"
 
     card.innerHTML = `
       <h3>${job.device}</h3>
@@ -1063,21 +1198,18 @@ router();
   return
 }
 
-const technicianName = localStorage.getItem(TECHNICIAN_NAME_KEY) || false
-!technicianName?(()=>{
-  const name = prompt('Enter Your Name')
-  !name && (()=>{
-    throw new Error('Name is required')
-  })()
-  localStorage.setItem(TECHNICIAN_NAME_KEY, name)
-})():''
+  const tech = await ensureTechnicianName();
+  if (!tech) return;
 
   const device = $("#device").value.trim()
   const complaint = $("#complaint").value.trim()
   const notes = $("#notes").value.trim()
 
   if(!device || !complaint){
-    alert("Device and complaint required")
+    await showAlert('Please enter both device model and complaint.', {
+      title: 'Required fields',
+      variant: 'error'
+    });
     return
   }
 

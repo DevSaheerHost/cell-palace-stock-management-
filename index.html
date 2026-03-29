@@ -251,7 +251,20 @@
 </nav>
 </div>
 
-
+<div id="app-modal-root" class="modal-root hidden" aria-hidden="true">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal-sheet glass-sheet" id="modalSheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle" class="modal-title"></h3>
+    <p id="modalMessage" class="modal-message"></p>
+    <div id="modalInputWrap" class="modal-input-wrap hidden">
+      <input type="text" id="modalInput" class="modal-input" autocomplete="name" />
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="modalBtnSecondary" class="modal-btn secondary hidden">Cancel</button>
+      <button type="button" id="modalBtnPrimary" class="modal-btn primary">OK</button>
+    </div>
+  </div>
+</div>
 
   <script type="module" src="main.js"></script>
   <script defer src="animations.js"></script>
