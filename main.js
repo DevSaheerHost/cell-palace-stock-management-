@@ -1041,7 +1041,24 @@ const showJobsToUI=job=>{
 
 
 
-// Gizmos codes
+// ########### Gizmos codes #############
+
+
+// helper fiunction 
+
+const isCurrentMonth = (dateKey) => {
+  const today = new Date()
+  
+  const [day, month, year] = dateKey.split("-").map(Number)
+  const jobDate = new Date(year, month - 1, day)
+  
+  return (
+    jobDate.getFullYear() === today.getFullYear() &&
+    jobDate.getMonth() === today.getMonth() &&
+    jobDate <= today
+  )
+}
+
 
 const formatTime = (timestamp) => {
 
@@ -1121,7 +1138,11 @@ const freshIphoneBackGlassKeywords = [
 const list = document.querySelector("#gizmos-list")
 list.innerHTML = ""
 
-const sortedDates = Object.keys(jobs).sort().reverse()
+//const sortedDates = Object.keys(jobs).sort().reverse()
+const sortedDates = Object.keys(jobs)
+  .filter(date => isCurrentMonth(date))
+  .sort()
+  .reverse()
 
 sortedDates.forEach(date => {
 
