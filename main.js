@@ -1080,12 +1080,43 @@ let totalJobCount = 0
 let totalDisplayCount = 0
 let totalMotherboardCount =0
 let totalIphoneBackGlass=0
+let totalfreshIphoneBackGlassCount =0
+let totalBackPanelCount = 0
+
 let motherboardPrice = 300
 let displayPrice = 100
+let backPanelPrice = 100
+let freshIphoneBackGlassPrice=500
+let curvedDisplaysPrice = 250; // led curved + costly
 
-const displayKeywords = ["LCD","LED","DISPLAY","COMBO"]
-const motherBoardKeywords= ['MOTHER BOARD', 'MOTHERBOARD', 'BOARD', 'BACKLIGHT']
-const icKeywords = ['CPU', 'EMMC', 'POERIC', 'IC']
+const displayKeywords = [
+  "LCD",
+  "LED",
+  "DISPLAY",
+  "COMBO"
+];
+const motherBoardKeywords= [
+  'MOTHER BOARD',
+  'MOTHERBOARD', 
+  'BOARD', 
+  'BACKLIGHT'
+];
+const icKeywords = [
+  'CPU', 
+  'EMMC', 
+  'POERIC', 
+  'IC'
+];
+const backPanelKeyWords = [
+  'PACKPANEL', 
+  'PACKPANNEL',
+  'BACK PANEL', 
+  'BACK PANNEL'
+];
+const freshIphoneBackGlassKeywords = [
+  'BACKGLASS', 
+  'BACK GLASS'
+];
 
 const list = document.querySelector("#gizmos-list")
 list.innerHTML = ""
@@ -1105,12 +1136,19 @@ sortedDates.forEach(date => {
     totalJobCount++
 
     const complaintText = (job.complaint || "").toUpperCase()
-
+    
     if(displayKeywords.some(word => complaintText.includes(word))){
       totalDisplayCount++
-    } else if (motherBoardKeywords.some(word=>complaintText.includes(word))) {
+    }
+    if (motherBoardKeywords.some(word=>complaintText.includes(word))) {
       totalMotherboardCount++
     }
+    if (backPanelKeyWords.some(word=> complaintText.includes(word))) {
+      totalBackPanelCount ++
+    }
+    if (freshIphoneBackGlassKeywords.some(word=>complaintText.includes(word))) {
+      totalfreshIphoneBackGlassCount++
+    } 
 
     const card = document.createElement("div")
     card.className = "job-card gizmo-card"
@@ -1120,6 +1158,9 @@ sortedDates.forEach(date => {
       <p><b>Complaint:</b> ${job.complaint}</p>
       <p><b>Notes:</b> ${job.notes || ''}</p>
       <p class='technician'><b></b> ${job.technician || ''}</p>
+      <p class='amount'>${
+        displayKeywords.some(word => complaintText.includes(word))?'+₹100':motherBoardKeywords.some(word => complaintText.includes(word))?'+₹300':backPanelKeyWords.some(word => complaintText.includes(word))?'+₹100':freshIphoneBackGlassKeywords.some(word => complaintText.includes(word))?'+₹500':''
+      }</p>
     `
 
     list.appendChild(card)
@@ -1130,8 +1171,10 @@ sortedDates.forEach(date => {
 
 const totalDisplayPrice = displayPrice*totalDisplayCount;
 const totalMotherboardPrice = motherboardPrice*totalMotherboardCount;
+const totalBackPanelPrice = backPanelPrice*totalBackPanelCount
+const totalIphoneBackGlassPrice = freshIphoneBackGlassPrice*totalfreshIphoneBackGlassCount
 
-const totalPrice = totalDisplayPrice+totalMotherboardPrice;
+const totalPrice = totalDisplayPrice+totalMotherboardPrice + totalBackPanelPrice+ totalIphoneBackGlassPrice;
 document.querySelector('#totJobEl').innerHTML =
 `<div class='workAmountElement'>Total Jobs : ${totalJobCount} - <span class='amount'>${totalPrice.toLocaleString()}</span></div>`
 
@@ -1140,9 +1183,16 @@ document.querySelector('#displayJobEl').innerHTML =
   
 document.querySelector('#motherboardJobEl').innerHTML=
   `<div class='workAmountElement'>Motherboard : ${totalMotherboardCount} - <span class='amount'>₹${totalMotherboardPrice.toLocaleString()}</span></div>`
+  
+  
+  document.querySelector('#iphoneGlassEle').innerHTML=
+  `<div class='workAmountElement'>iPhone Back glass: ${totalfreshIphoneBackGlassCount} - <span class='amount'>₹${totalIphoneBackGlassPrice.toLocaleString()}</span></div>`
+  
+  document.querySelector('#backpanelEle').innerHTML =
+  `<div class='workAmountElement'>Back Pannel : ${totalBackPanelCount} - <span class='amount'>₹${totalBackPanelPrice.toLocaleString()}</span></div>`
+
 
 }
-
 
 const loadGizmosWorks = () => {
   const listContainer = document.querySelector('#gizmos-list')
