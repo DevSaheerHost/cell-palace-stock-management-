@@ -1189,6 +1189,14 @@ sortedDates.forEach(date => {
   })
 
 })
+if (sortedDates.length === 0) {
+  list.innerHTML = `
+    <div class="empty-state">
+      <h3>📅 No jobs this month</h3>
+      <p>Try adding a new job or check another date range.</p>
+    </div>
+  `;
+}
 
 const totalDisplayPrice = displayPrice*totalDisplayCount;
 const totalMotherboardPrice = motherboardPrice*totalMotherboardCount;
