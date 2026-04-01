@@ -1093,135 +1093,122 @@ const getDateLabel = (dateKey) => {
 
 const renderGizmos = (jobs) => {
 
-let totalJobCount = 0
-let totalDisplayCount = 0
-let totalMotherboardCount =0
-let totalIphoneBackGlass=0
-let totalfreshIphoneBackGlassCount =0
-let totalBackPanelCount = 0
+  let totalJobCount = 0;
 
-let motherboardPrice = 300
-let displayPrice = 100
-let backPanelPrice = 100
-let freshIphoneBackGlassPrice=500
-let curvedDisplaysPrice = 250; // led curved + costly
+  let counts = {
+    display: 0,
+    curved: 0,
+    motherboard: 0,
+    backpanel: 0,
+    iphoneGlass: 0
+  };
 
-const displayKeywords = [
-  "LCD",
-  "LED",
-  "DISPLAY",
-  "COMBO"
-];
-const motherBoardKeywords= [
-  'MOTHER BOARD',
-  'MOTHERBOARD', 
-  'BOARD', 
-  'BACKLIGHT'
-];
-const icKeywords = [
-  'CPU', 
-  'EMMC', 
-  'POERIC', 
-  'IC'
-];
-const backPanelKeyWords = [
-  'PACKPANEL', 
-  'PACKPANNEL',
-  'BACK PANEL', 
-  'BACK PANNEL'
-];
-const freshIphoneBackGlassKeywords = [
-  'BACKGLASS', 
-  'BACK GLASS'
-];
+  const prices = {
+    display: 100,
+    curved: 250,
+    motherboard: 300,
+    backpanel: 100,
+    iphoneGlass: 500
+  };
 
-const list = document.querySelector("#gizmos-list")
-list.innerHTML = ""
+  const keywords = {
+    curved: ['CURVED'],
+    display: ['LCD', 'LED', 'DISPLAY', 'COMBO'],
+    motherboard: ['MOTHER BOARD', 'MOTHERBOARD', 'BOARD', 'BACKLIGHT'],
+    backpanel: ['PACKPANEL', 'PACKPANNEL', 'BACK PANEL', 'BACK PANNEL'],
+    iphoneGlass: ['BACKGLASS', 'BACK GLASS']
+  };
 
-//const sortedDates = Object.keys(jobs).sort().reverse()
-const sortedDates = Object.keys(jobs)
-  .filter(date => isCurrentMonth(date))
-  .sort()
-  .reverse()
+  const getJobType = (text) => {
+    if (keywords.curved.some(k => text.includes(k))) return 'curved';
+    if (keywords.display.some(k => text.includes(k))) return 'display';
+    if (keywords.motherboard.some(k => text.includes(k))) return 'motherboard';
+    if (keywords.backpanel.some(k => text.includes(k))) return 'backpanel';
+    if (keywords.iphoneGlass.some(k => text.includes(k))) return 'iphoneGlass';
+    return null;
+  };
 
-sortedDates.forEach(date => {
+  const list = document.querySelector("#gizmos-list");
+  list.innerHTML = "";
 
-  const header = document.createElement("div")
-  header.className = "date-splitter"
-  header.textContent = getDateLabel(date)
+  const sortedDates = Object.keys(jobs)
+    .filter(date => isCurrentMonth(date))
+    .sort()
+    .reverse();
 
-  list.appendChild(header)
+  sortedDates.forEach(date => {
 
-  Object.entries(jobs[date]).forEach(([id, job]) => {
+    const header = document.createElement("div");
+    header.className = "date-splitter";
+    header.textContent = getDateLabel(date);
+    list.appendChild(header);
 
-    totalJobCount++
+    Object.entries(jobs[date]).forEach(([id, job]) => {
 
-    const complaintText = (job.complaint || "").toUpperCase()
-    
-    if(displayKeywords.some(word => complaintText.includes(word))){
-      totalDisplayCount++
-    }
-    if (motherBoardKeywords.some(word=>complaintText.includes(word))) {
-      totalMotherboardCount++
-    }
-    if (backPanelKeyWords.some(word=> complaintText.includes(word))) {
-      totalBackPanelCount ++
-    }
-    if (freshIphoneBackGlassKeywords.some(word=>complaintText.includes(word))) {
-      totalfreshIphoneBackGlassCount++
-    } 
+      totalJobCount++;
 
-    const card = document.createElement("div")
-    card.className = "job-card gizmo-card"
+      const complaintText = (job.complaint || "").toUpperCase();
+      const type = getJobType(complaintText);
 
-    card.innerHTML = `
-      <h3>${job.device}</h3>
-      <p><b>Complaint:</b> ${job.complaint}</p>
-      <p><b>Notes:</b> ${job.notes || ''}</p>
-      <p class='technician'><b></b> ${job.technician || ''}</p>
-      <p class='amount'>${
-        displayKeywords.some(word => complaintText.includes(word))?'+₹100':motherBoardKeywords.some(word => complaintText.includes(word))?'+₹300':backPanelKeyWords.some(word => complaintText.includes(word))?'+₹100':freshIphoneBackGlassKeywords.some(word => complaintText.includes(word))?'+₹500':''
-      }</p>
-    `
+      if (type) counts[type]++;
 
-    list.appendChild(card)
+      const amount = type ? `+₹${prices[type]}` : '';
 
-  })
+      const card = document.createElement("div");
+      card.className = "job-card gizmo-card";
 
-})
-if (sortedDates.length === 0) {
-  list.innerHTML = `
-    <div class="empty-state">
-      <h3>📅 No jobs this month</h3>
-      <p>Try adding a new job or check another date range.</p>
-    </div>
-  `;
-}
+      card.innerHTML = `
+        <h3>${job.device}</h3>
+        <p><b>Complaint:</b> ${job.complaint}</p>
+        <p><b>Notes:</b> ${job.notes || ''}</p>
+        <p class='technician'>${job.technician || ''}</p>
+        <p class='amount'>${amount}</p>
+      `;
 
-const totalDisplayPrice = displayPrice*totalDisplayCount;
-const totalMotherboardPrice = motherboardPrice*totalMotherboardCount;
-const totalBackPanelPrice = backPanelPrice*totalBackPanelCount
-const totalIphoneBackGlassPrice = freshIphoneBackGlassPrice*totalfreshIphoneBackGlassCount
+      list.appendChild(card);
+    });
+  });
 
-const totalPrice = totalDisplayPrice+totalMotherboardPrice + totalBackPanelPrice+ totalIphoneBackGlassPrice;
-document.querySelector('#totJobEl').innerHTML =
-`<div class='workAmountElement'>Total Jobs : ${totalJobCount} - <span class='amount'>${totalPrice.toLocaleString()}</span></div>`
+  // Empty state
+  if (sortedDates.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <h3>📅 No jobs this month</h3>
+        <p>Try adding a new job or check another date range.</p>
+      </div>
+    `;
+  }
 
-document.querySelector('#displayJobEl').innerHTML =
-  `<div class='workAmountElement'>Display : ${totalDisplayCount} - <span class='amount'>₹${totalDisplayPrice.toLocaleString()}</span></div>`;
-  
-document.querySelector('#motherboardJobEl').innerHTML=
-  `<div class='workAmountElement'>Motherboard : ${totalMotherboardCount} - <span class='amount'>₹${totalMotherboardPrice.toLocaleString()}</span></div>`
-  
-  
-  document.querySelector('#iphoneGlassEle').innerHTML=
-  `<div class='workAmountElement'>iPhone Back glass: ${totalfreshIphoneBackGlassCount} - <span class='amount'>₹${totalIphoneBackGlassPrice.toLocaleString()}</span></div>`
-  
+  // Totals
+  const totals = {
+    display: counts.display * prices.display,
+    curved: counts.curved * prices.curved,
+    motherboard: counts.motherboard * prices.motherboard,
+    backpanel: counts.backpanel * prices.backpanel,
+    iphoneGlass: counts.iphoneGlass * prices.iphoneGlass
+  };
+
+  const totalPrice = Object.values(totals).reduce((a, b) => a + b, 0);
+
+  // UI update
+  document.querySelector('#totJobEl').innerHTML =
+    `<div class='workAmountElement'>Total Jobs : ${totalJobCount} - <span class='amount'>₹${totalPrice.toLocaleString()}</span></div>`;
+
+  document.querySelector('#displayJobEl').innerHTML =
+    `<div class='workAmountElement'>Display : ${counts.display} - <span class='amount'>₹${totals.display.toLocaleString()}</span></div>`;
+
+  document.querySelector('#curvedDisplayEl').innerHTML =
+    `<div class='workAmountElement'>Curved Display : ${counts.curved} - <span class='amount'>₹${totals.curved.toLocaleString()}</span></div>`;
+
+  document.querySelector('#motherboardJobEl').innerHTML =
+    `<div class='workAmountElement'>Motherboard : ${counts.motherboard} - <span class='amount'>₹${totals.motherboard.toLocaleString()}</span></div>`;
+
   document.querySelector('#backpanelEle').innerHTML =
-  `<div class='workAmountElement'>Back Pannel : ${totalBackPanelCount} - <span class='amount'>₹${totalBackPanelPrice.toLocaleString()}</span></div>`
+    `<div class='workAmountElement'>Back Panel : ${counts.backpanel} - <span class='amount'>₹${totals.backpanel.toLocaleString()}</span></div>`;
 
-
-}
+  document.querySelector('#iphoneGlassEle').innerHTML =
+    `<div class='workAmountElement'>iPhone Back Glass : ${counts.iphoneGlass} - <span class='amount'>₹${totals.iphoneGlass.toLocaleString()}</span></div>`;
+};
 
 const loadGizmosWorks = () => {
   const listContainer = document.querySelector('#gizmos-list')
