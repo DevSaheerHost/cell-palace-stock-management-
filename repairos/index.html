@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RepairOS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#07090f; --surface:#0f1219; --card:#151821; --card2:#1b1f2d;
+      --border:#22273a; --border2:#2c3249;
+      --amber:#f59e0b; --amber-dim:#92620a; --amber-glow:rgba(245,158,11,0.11);
+      --blue:#60a5fa; --blue-glow:rgba(96,165,250,0.1);
+      --green:#4ade80; --green-glow:rgba(74,222,128,0.1);
+      --red:#f87171; --red-glow:rgba(248,113,113,0.1);
+      --purple:#a78bfa; --purple-glow:rgba(167,139,250,0.1);
+      --teal:#2dd4bf; --teal-glow:rgba(45,212,191,0.1);
+      --text:#dde3f0; --text-muted:#4f5a72; --text-soft:#8896b3;
+      --fh:'Barlow Condensed',sans-serif; --fb:'DM Sans',sans-serif; --fm:'JetBrains Mono',monospace;
+      --r:14px; --rs:9px; --nav:70px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fb);overflow:hidden;-webkit-tap-highlight-color:transparent}
+    ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+    /* ─── SETUP ─── */
+    #setup-screen{position:fixed;inset:0;z-index:200;display:none;align-items:flex-start;justify-content:center;background:var(--bg);padding:20px;overflow-y:auto}
+    .setup-wrap{width:100%;max-width:440px;margin:auto;padding:10px 0 30px}
+    .setup-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 22px;animation:up .4s cubic-bezier(.16,1,.3,1) both}
+    .s-logo{display:flex;align-items:center;gap:9px;margin-bottom:20px}
+    .s-logo-i{width:36px;height:36px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
+    .s-logo-t{font-family:var(--fh);font-size:22px;font-weight:900;letter-spacing:1px} .s-logo-t b{color:var(--amber)}
+    .s-title{font-family:var(--fh);font-size:21px;font-weight:800;margin-bottom:5px}
+    .s-sub{font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:18px}
+    .s-step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--text-soft);line-height:1.6}
+    .s-step b{color:var(--text)} .s-step code{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:var(--fm);font-size:11px;color:var(--amber)}
+    .s-fields{display:flex;flex-direction:column;gap:11px;margin:18px 0}
+    .s-lbl{font-size:11px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+    .s-inp{width:100%;padding:11px 13px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--fm);font-size:12px;outline:none;transition:border-color .2s,box-shadow .2s}
+    .s-inp:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-glow)}
+    .s-inp::placeholder{color:var(--text-muted);font-family:var(--fb);font-size:13px}
+    .s-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:12px;line-height:1.8}
+    .s-note a{color:var(--amber);cursor:pointer;background:none;border:none;font-size:11px;font-family:var(--fb)}
+
+    /* ─── AUTH ─── */
+    #auth-screen{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+    .a-glow{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .a-glow::before{content:'';position:absolute;top:-30%;left:-20%;width:70%;height:70%;background:radial-gradient(circle,rgba(245,158,11,.07) 0%,transparent 70%);animation:fA 9s ease-in-out infinite}
+    .a-glow::after{content:'';position:absolute;bottom:-30%;right:-20%;width:80%;height:80%;background:radial-gradient(circle,rgba(96,165,250,.05) 0%,transparent 70%);animation:fB 12s ease-in-out infinite}
+    @keyframes fA{0%,100%{transform:translate(0,0)}50%{transform:translate(25px,-18px)}}
+    @keyframes fB{0%,100%{transform:translate(0,0)}50%{transform:translate(-18px,25px)}}
+    @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes cIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .a-card{position:relative;z-index:1;width:100%;max-width:390px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:32px 24px;animation:up .45s cubic-bezier(.16,1,.3,1) both}
+    .a-logo{display:flex;align-items:center;gap:9px;margin-bottom:26px}
+    .a-logo-i{width:38px;height:38px;background:var(--amber);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px}
+    .a-logo-t{font-family:var(--fh);font-size:25px;font-weight:900;letter-spacing:1px} .a-logo-t b{color:var(--amber)}
+    .a-logo-s{font-size:10px;color:var(--text-muted);font-family:var(--fm);margin-top:1px}
+    .a-tabs{display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:3px;margin-bottom:22px}
+    .a-tab{flex:1;padding:9px;border:none;background:transparent;color:var(--text-muted);font-family:var(--fb);font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .18s}
+    .a-tab.on{background:var(--card2);color:var(--text)}
+    .fg{margin-bottom:13px}
+    .fl{display:block;font-size:11px;font-weight:700;color:var(--text-soft);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+    .fi{width:100%;padding:12px 13px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--fb);font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none}
+    .fi:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-glow)}
+    .fi::placeholder{color:var(--text-muted)}
+    textarea.fi{resize:none;min-height:80px;line-height:1.5}
+    select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234f5a72' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+    .btn-p{width:100%;padding:13px;background:var(--amber);border:none;border-radius:var(--rs);color:#000;font-family:var(--fh);font-size:16px;font-weight:800;letter-spacing:1.5px;cursor:pointer;transition:all .2s;margin-top:8px}
+    .btn-p:hover:not(:disabled){background:#d97706;transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.25)}
+    .btn-p:active{transform:none} .btn-p:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .a-err{background:var(--red-glow);border:1px solid rgba(248,113,113,.3);color:#fca5a5;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-top:11px;display:none;line-height:1.4}
+    .a-link{text-align:center;margin-top:13px;font-size:12px;color:var(--text-muted)}
+    .a-link button{background:none;border:none;color:var(--amber);cursor:pointer;font-size:12px;font-family:var(--fb)}
+    .cfg-link{text-align:center;margin-top:10px}
+    .cfg-link button{background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;text-decoration:underline;font-family:var(--fb)}
+
+    /* ─── VERIFY ─── */
+    #verify-screen{position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+    .v-card{text-align:center;max-width:340px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:38px 24px;animation:up .4s cubic-bezier(.16,1,.3,1) both}
+    .v-icon{font-size:52px;margin-bottom:16px}
+    .v-card h2{font-family:var(--fh);font-size:26px;font-weight:800;margin-bottom:10px}
+    .v-card p{color:var(--text-soft);font-size:14px;line-height:1.7;margin-bottom:22px} .v-card p strong{color:var(--text)}
+    .v-btns{display:flex;flex-direction:column;gap:8px}
+    .btn-a{padding:12px;background:var(--amber-glow);border:1px solid var(--amber-dim);border-radius:var(--rs);color:var(--amber);font-family:var(--fb);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-a:hover{background:var(--amber);color:#000;border-color:var(--amber)}
+    .btn-g{padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);color:var(--text-soft);font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;transition:all .18s}
+    .btn-g:hover{border-color:var(--border2);color:var(--text)}
+
+    /* ─── APP ─── */
+    #app{display:none;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+
+    /* ─── HEADER ─── */
+    .hdr{flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:10}
+    .hdr-top{display:flex;align-items:center;justify-content:space-between;padding:13px 16px 11px}
+    .h-logo{display:flex;align-items:center;gap:8px}
+    .h-logo-i{width:29px;height:29px;background:var(--amber);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .h-logo-t{font-family:var(--fh);font-size:22px;font-weight:900;letter-spacing:1px} .h-logo-t b{color:var(--amber)}
+    .h-acts{display:flex;gap:6px}
+    .iBtn{width:36px;height:36px;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;color:var(--text-soft);position:relative}
+    .iBtn:hover,.iBtn.on{border-color:var(--amber);color:var(--amber);background:var(--amber-glow)}
+    .iBtn .dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--surface);display:none}
+    .iBtn .dot.show{display:block}
+    .srch-wrap{padding:0 13px 11px}
+    .srch{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0 11px;transition:border-color .2s,box-shadow .2s}
+    .srch:focus-within{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-glow)}
+    .srch svg{color:var(--text-muted);flex-shrink:0}
+    .srch input{flex:1;padding:10px 0;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--fb);font-size:14px}
+    .srch input::placeholder{color:var(--text-muted)}
+    .srch-x{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px;display:none;transition:color .15s;padding:2px 0}
+    .srch-x:hover{color:var(--text)}
+
+    /* ─── CHIPS ─── */
+    .chips{display:flex;gap:7px;overflow-x:auto;padding:7px 13px;flex-shrink:0;scrollbar-width:none;background:var(--surface);border-bottom:1px solid var(--border)}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex-shrink:0;padding:5px 13px;background:var(--bg);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--text-soft);cursor:pointer;transition:all .16s;white-space:nowrap}
+    .chip.on{background:var(--amber-glow);border-color:var(--amber-dim);color:var(--amber)}
+
+    /* ─── STATS ─── */
+    .stats{display:flex;gap:8px;padding:10px 13px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+    .stats::-webkit-scrollbar{display:none}
+    .stat{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;min-width:84px}
+    .stat-n{font-family:var(--fh);font-size:26px;font-weight:800;line-height:1}
+    .stat-l{font-size:11px;color:var(--text-muted);margin-top:2px;font-weight:500}
+
+    /* ─── VIEW CONTAINER ─── */
+    .vc{flex:1;overflow:hidden;position:relative}
+    .view{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav) + 16px);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .22s,transform .22s}
+    .view.on{opacity:1;pointer-events:auto;transform:none}
+
+    /* ─── JOBS ─── */
+    .j-top{display:flex;align-items:center;justify-content:space-between;padding:9px 15px 4px}
+    .j-count{font-size:12px;color:var(--text-muted);font-family:var(--fm)}
+    .ref-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:5px 9px;border-radius:7px;transition:all .18s}
+    .ref-btn:hover{color:var(--amber);background:var(--amber-glow)}
+    .ref-btn svg{transition:transform .5s}
+    .ref-btn.spin svg{animation:spin .6s linear infinite}
+    .jlist{padding:2px 11px 8px;display:flex;flex-direction:column;gap:8px}
+
+    /* ─── JOB CARD ─── */
+    .jcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:border-color .18s,background .18s,transform .15s;animation:cIn .3s cubic-bezier(.16,1,.3,1) both;position:relative;overflow:hidden}
+    .jcard::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--amber);border-radius:2px 0 0 2px;opacity:0;transition:opacity .18s}
+    .jcard:active{transform:scale(.986)}
+    .jcard:hover{border-color:var(--border2);background:var(--card2)}
+    .jcard:hover::after{opacity:1}
+    .jcard.req::after{opacity:1;background:var(--blue)}
+    .jcard.urg{border-color:rgba(248,113,113,.22)} .jcard.urg::after{opacity:1;background:var(--red)}
+
+    .c-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:10px}
+    .c-dev{font-family:var(--fh);font-size:19px;font-weight:700;line-height:1.1;flex:1}
+    /* type badge */
+    .tbadge{flex-shrink:0;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--fm);letter-spacing:.4px}
+    .bj{background:var(--amber-glow);color:var(--amber);border:1px solid var(--amber-dim)}
+    .br{background:var(--blue-glow);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+    .bu{background:var(--red-glow);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+    /* status badge */
+    .sbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--fm);letter-spacing:.2px;margin-bottom:8px}
+    .s-pending{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+    .s-progress{background:var(--blue-glow);color:var(--blue);border:1px solid rgba(96,165,250,.25)}
+    .s-spare{background:var(--purple-glow);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+    .s-complete{background:var(--green-glow);color:var(--green);border:1px solid rgba(74,222,128,.25)}
+    .s-collected{background:var(--teal-glow);color:var(--teal);border:1px solid rgba(45,212,191,.25)}
+    .s-returned{background:var(--red-glow);color:var(--red);border:1px solid rgba(248,113,113,.25)}
+
+    .c-cmp{font-size:13px;color:var(--text-soft);line-height:1.45;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .c-note{padding:7px 10px;background:var(--bg);border-radius:7px;font-size:11px;color:var(--text-muted);font-style:italic;margin-bottom:8px;line-height:1.4}
+    .c-foot{display:flex;flex-wrap:wrap;gap:9px;border-top:1px solid var(--border);padding-top:8px}
+    .meta{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-muted)}
+    .meta svg{width:12px;height:12px;flex-shrink:0}
+    .meta.t{color:var(--text-soft);font-weight:500}
+
+    /* ─── DATE DIVIDER ─── */
+    .ddiv{display:flex;align-items:center;gap:9px;padding:11px 3px 5px;position:sticky;top:0;z-index:4;background:linear-gradient(to bottom,var(--bg) 60%,transparent)}
+    .dlbl{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--text-muted);white-space:nowrap}
+    .dline{flex:1;height:1px;background:var(--border)}
+    .dcnt{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--amber);background:var(--amber-glow);border:1px solid var(--amber-dim);border-radius:10px;padding:1px 7px}
+
+    /* ─── STATES ─── */
+    .ls,.es{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;gap:13px}
+    .loader{width:30px;height:30px;border:2.5px solid var(--border2);border-top-color:var(--amber);border-radius:50%;animation:spin .75s linear infinite}
+    .ei{font-size:44px;opacity:.35} .et{font-family:var(--fh);font-size:22px;font-weight:700;color:var(--text-soft)} .es2{font-size:13px;color:var(--text-muted);max-width:230px;line-height:1.5}
+
+    /* ─── REQUEST VIEW ─── */
+    #vReq{padding:16px}
+    .vh{font-family:var(--fh);font-size:30px;font-weight:900;margin-bottom:3px}
+    .vs{font-size:13px;color:var(--text-muted);margin-bottom:22px}
+    .rform{display:flex;flex-direction:column;gap:13px}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .fg label{display:block;font-size:11px;font-weight:700;color:var(--text-soft);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+    .urg-row{display:flex;gap:8px}
+    .uo{flex:1;padding:11px 8px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .16s;font-size:13px;font-weight:500;color:var(--text-soft)}
+    .uo.un{background:var(--amber-glow);border-color:var(--amber-dim);color:var(--amber)}
+    .uo.uu{background:var(--red-glow);border-color:rgba(248,113,113,.4);color:var(--red)}
+    .cc{font-size:11px;color:var(--text-muted);text-align:right;margin-top:3px;font-family:var(--fm)}
+    .sub-btn{padding:14px;background:var(--amber);border:none;border-radius:var(--rs);color:#000;font-family:var(--fh);font-size:17px;font-weight:800;letter-spacing:1.5px;cursor:pointer;transition:all .2s;margin-top:6px;width:100%}
+    .sub-btn:hover:not(:disabled){background:#d97706;transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.25)}
+    .sub-btn:active{transform:none} .sub-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .rh-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin:22px 0 9px;padding:0 2px}
+    .rh-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px}
+    .rh-dev{font-family:var(--fh);font-size:15px;font-weight:700}
+    .rh-meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+    /* ─── SETTINGS ─── */
+    #vSet{padding:16px}
+    .prof{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:17px;margin-bottom:20px;display:flex;align-items:center;gap:13px}
+    .ava{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#d97706);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:22px;font-weight:900;color:#000;flex-shrink:0}
+    .pi{flex:1;min-width:0} .pe{font-size:14px;font-weight:500;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pt{font-size:10px;font-family:var(--fm);color:var(--green);display:flex;align-items:center;gap:3px}
+    .sg{margin-bottom:18px}
+    .sgt{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;padding:0 2px}
+    .sl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+    .sr{display:flex;align-items:center;gap:11px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+    .sr:last-child{border-bottom:none} .sr:hover{background:var(--card2)}
+    .ri{width:31px;height:31px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .rb{flex:1} .rl{font-size:14px;font-weight:500} .rs2{font-size:12px;color:var(--text-muted);margin-top:1px} .re{color:var(--text-muted);font-size:18px}
+    .tog{width:42px;height:24px;background:var(--border2);border-radius:12px;position:relative;transition:background .2s;flex-shrink:0;cursor:pointer}
+    .tog.on{background:var(--amber)}
+    .tog::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .22s cubic-bezier(.16,1,.3,1);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+    .tog.on::after{transform:translateX(18px)}
+    .d-btn{width:100%;padding:13px;background:var(--red-glow);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);color:var(--red);font-family:var(--fb);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+    .d-btn:hover{background:rgba(248,113,113,.2);border-color:var(--red)}
+    .av{font-family:var(--fm);font-size:10px;color:var(--text-muted);text-align:center;padding:14px 0 4px}
+
+    /* ─── MODAL ─── */
+    .mover{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+    .mover.on{opacity:1;pointer-events:auto}
+    .msheet{width:100%;max-width:540px;max-height:88vh;background:var(--surface);border-radius:22px 22px 0 0;border:1px solid var(--border);border-bottom:none;overflow-y:auto;padding:0 19px 28px;transform:translateY(50px);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+    .mover.on .msheet{transform:none}
+    .mhw{position:sticky;top:0;background:var(--surface);padding:13px 0 9px;z-index:1}
+    .mh{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto}
+    .mbadges{margin-bottom:9px;display:flex;gap:6px;flex-wrap:wrap}
+    .mdev{font-family:var(--fh);font-size:29px;font-weight:900;line-height:1.1;margin-bottom:5px}
+    .mts{font-size:12px;color:var(--text-muted);font-family:var(--fm)}
+    .mdiv{height:1px;background:var(--border);margin:15px 0}
+    .mf{margin-bottom:13px}
+    .mfl{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+    .mfv{font-size:15px;color:var(--text);line-height:1.5}
+    .mfv.mono{font-family:var(--fm);font-size:12px;color:var(--text-muted)}
+    .mcl{width:100%;padding:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);color:var(--text-soft);font-family:var(--fb);font-size:14px;cursor:pointer;transition:all .18s;margin-top:9px}
+    .mcl:hover{border-color:var(--border2);color:var(--text);background:var(--card2)}
+
+    /* ─── FILTER PANEL ─── */
+    .fbk{position:fixed;inset:0;z-index:49;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s}
+    .fbk.on{opacity:1;pointer-events:auto}
+    .fpan{position:fixed;top:0;right:0;bottom:0;width:min(82%,296px);background:var(--surface);border-left:1px solid var(--border);z-index:50;overflow-y:auto;transform:translateX(110%);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+    .fpan.on{transform:none}
+    .fpi{padding:20px 17px}
+    .fpt{font-family:var(--fh);font-size:23px;font-weight:800;margin-bottom:5px}
+    .fps{font-size:12px;color:var(--text-muted);margin-bottom:20px}
+    .fsc{margin-bottom:20px}
+    .fsct{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+    .fopts{display:flex;flex-direction:column;gap:6px}
+    .fopt{display:flex;align-items:center;gap:9px;padding:10px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .16s;font-size:13px;color:var(--text-soft)}
+    .fopt.on{background:var(--amber-glow);border-color:var(--amber-dim);color:var(--amber)}
+    .fck{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+    .fopt.on .fck{background:var(--amber);border-color:var(--amber);color:#000}
+    .fclr{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--text-soft);cursor:pointer;font-family:var(--fb);font-size:13px;transition:all .18s;margin-top:4px}
+    .fclr:hover{border-color:rgba(248,113,113,.5);color:var(--red)}
+
+    /* ─── NAV ─── */
+    .nav{position:fixed;bottom:0;left:0;right:0;z-index:20;height:var(--nav);background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 8px;padding-bottom:max(env(safe-area-inset-bottom),0px)}
+    .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;cursor:pointer;color:var(--text-muted);transition:color .18s;border:none;background:none;position:relative}
+    .nb.on{color:var(--amber)}
+    .nbi{width:31px;height:31px;display:flex;align-items:center;justify-content:center;border-radius:9px;transition:background .18s;font-size:18px}
+    .nb.on .nbi{background:var(--amber-glow)}
+    .nbl{font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+
+    /* ─── TOAST ─── */
+    .toast{position:fixed;bottom:calc(var(--nav) + 13px);left:50%;transform:translateX(-50%) translateY(14px);background:var(--green);color:#000;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;max-width:90vw;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.err{background:var(--red);color:#fff}
+  </style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div id="setup-screen">
+  <div class="setup-wrap">
+    <div class="setup-card">
+      <div class="s-logo"><div class="s-logo-i">🔧</div><div class="s-logo-t">Repair<b>OS</b></div></div>
+      <div class="s-title">Connect Firebase</div>
+      <div class="s-sub">One-time setup. Credentials saved locally in your browser only.</div>
+      <div class="s-step"><b>Step 1:</b> Open <code>console.firebase.google.com</code> → Project Settings → General → Your Web App → firebaseConfig</div>
+      <div class="s-step"><b>Step 2:</b> Paste the values below. Make sure <b>Email/Password Auth</b> and <b>Realtime Database</b> are enabled.</div>
+      <div class="s-fields">
+        <div><div class="s-lbl">API Key *</div><input id="c-key" class="s-inp" placeholder="AIzaSy…"></div>
+        <div><div class="s-lbl">Auth Domain *</div><input id="c-auth" class="s-inp" placeholder="your-project.firebaseapp.com"></div>
+        <div><div class="s-lbl">Database URL *</div><input id="c-db" class="s-inp" placeholder="https://your-project-default-rtdb.firebaseio.com"></div>
+        <div><div class="s-lbl">Project ID *</div><input id="c-proj" class="s-inp" placeholder="your-project-id"></div>
+        <div><div class="s-lbl">App ID *</div><input id="c-app" class="s-inp" placeholder="1:12345:web:abc…"></div>
+      </div>
+      <button class="btn-p" onclick="saveConfig()">CONNECT DATABASE →</button>
+      <div class="a-err" id="c-err"></div>
+      <div class="s-note">
+        <a onclick="prefillShop()">Pre-fill shop-adfbb fields</a> · <a onclick="useStoredConfig()">Load saved config</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AUTH ══ -->
+<div id="auth-screen">
+  <div class="a-glow"></div>
+  <div class="a-card">
+    <div class="a-logo">
+      <div class="a-logo-i">🔧</div>
+      <div><div class="a-logo-t">Repair<b>OS</b></div><div class="a-logo-s">Shop Management</div></div>
+    </div>
+    <div class="a-tabs">
+      <button class="a-tab on" onclick="switchTab('login')">Sign In</button>
+      <button class="a-tab" onclick="switchTab('signup')">Register</button>
+    </div>
+    <div class="fg"><label class="fl">Email</label><input type="email" id="a-email" class="fi" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="fg"><label class="fl">Password</label><input type="password" id="a-pass" class="fi" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="fg" id="a-nwrap" style="display:none"><label class="fl">Your Name</label><input type="text" id="a-name" class="fi" placeholder="e.g. Saheer"></div>
+    <button class="btn-p" id="a-btn" onclick="doAuth()">SIGN IN</button>
+    <div class="a-err" id="a-err"></div>
+    <div class="a-link"><span id="a-lbl">Don't have an account?</span> <button id="a-lbtn" onclick="switchTab(authMode==='login'?'signup':'login')">Register</button></div>
+    <div class="cfg-link"><button onclick="showSetup()">Change Firebase config</button></div>
+  </div>
+</div>
+
+<!-- ══ VERIFY ══ -->
+<div id="verify-screen">
+  <div class="a-glow"></div>
+  <div class="v-card">
+    <div class="v-icon">📬</div>
+    <h2>Verify Email</h2>
+    <p>We sent a link to <strong id="v-email">—</strong>. Click it to continue.</p>
+    <div class="v-btns">
+      <button class="btn-a" onclick="checkVerified()">✓ I've verified — Continue</button>
+      <button class="btn-g" onclick="resendVerify()">Resend verification email</button>
+      <button class="btn-g" onclick="doSignOut()" style="color:var(--text-muted);font-size:12px">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="hdr" id="mainHdr">
+    <div class="hdr-top">
+      <div class="h-logo">
+        <div class="h-logo-i">🔧</div>
+        <div class="h-logo-t">Repair<b>OS</b></div>
+      </div>
+      <div class="h-acts">
+        <div class="iBtn" id="filtBtn" onclick="toggleFilter()" title="Filters">
+          <div class="dot" id="fDot"></div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+        </div>
+        <div class="iBtn" id="sortBtn" onclick="doSort()" title="Toggle sort">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="srch-wrap">
+      <div class="srch">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="srch-in" placeholder="Device, complaint, technician…" oninput="handleSearch(this.value)">
+        <button class="srch-x" id="srch-x" onclick="clearSearch()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chips — default: Today -->
+  <div class="chips" id="chipRow">
+    <div class="chip"    data-f="all"      onclick="setChip(this)">All</div>
+    <div class="chip on" data-f="today"    onclick="setChip(this)">Today</div>
+    <div class="chip"    data-f="week"     onclick="setChip(this)">This Week</div>
+    <div class="chip"    data-f="month"    onclick="setChip(this)">This Month</div>
+    <div class="chip"    data-f="request"  onclick="setChip(this)">Requests</div>
+    <div class="chip"    data-f="urgent"   onclick="setChip(this)">🔥 Urgent</div>
+    <div class="chip"    data-f="pending"  onclick="setChip(this)">Pending</div>
+    <div class="chip"    data-f="spare"    onclick="setChip(this)">Waiting Spare</div>
+  </div>
+
+  <div class="vc">
+    <!-- JOBS -->
+    <div class="view on" id="vJobs">
+      <div class="stats" id="statsBar">
+        <div class="stat"><div class="stat-n" id="sTotal"   style="color:var(--amber)">0</div><div class="stat-l">Total</div></div>
+        <div class="stat"><div class="stat-n" id="sToday"   style="color:var(--blue)">0</div><div class="stat-l">Today</div></div>
+        <div class="stat"><div class="stat-n" id="sPending" style="color:var(--amber)">0</div><div class="stat-l">Pending</div></div>
+        <div class="stat"><div class="stat-n" id="sSpare"   style="color:var(--purple)">0</div><div class="stat-l">Waiting Spare</div></div>
+        <div class="stat"><div class="stat-n" id="sDone"    style="color:var(--green)">0</div><div class="stat-l">Complete</div></div>
+        <div class="stat"><div class="stat-n" id="sUrg"     style="color:var(--red)">0</div><div class="stat-l">Urgent</div></div>
+      </div>
+      <div class="j-top">
+        <span class="j-count" id="jCount">—</span>
+        <button class="ref-btn" id="refBtn" onclick="loadJobs()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="jlist" id="jlist">
+        <div class="ls"><div class="loader"></div><div style="color:var(--text-muted);font-size:13px">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- REQUEST -->
+    <div class="view" id="vReq">
+      <div class="vh">New Request</div>
+      <div class="vs">Submit a repair service request to the shop</div>
+      <div class="rform">
+        <div class="frow">
+          <div class="fg"><label>Brand</label><input type="text" id="r-brand" class="fi" placeholder="e.g. VIVO"></div>
+          <div class="fg"><label>Model</label><input type="text" id="r-model" class="fi" placeholder="e.g. T2 Pro"></div>
+        </div>
+        <div class="fg"><label>Complaint / Issue</label><input type="text" id="r-cmp" class="fi" placeholder="What's wrong with the device?"></div>
+        <div class="fg"><label>Technician</label><input type="text" id="r-tech" class="fi" placeholder="Who will handle it?" value="Saheer Babu"></div>
+        <div class="fg">
+          <label>Status</label>
+          <select id="r-status" class="fi">
+            <option value="pending">⏳ Pending</option>
+            <option value="progress">🔨 In Progress</option>
+            <option value="spare">📦 Waiting for Spare</option>
+            <option value="complete">✅ Complete</option>
+            <option value="collected">🎉 Collected</option>
+            <option value="returned">↩️ Returned</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted)">(optional)</span></label>
+          <textarea id="r-notes" class="fi" placeholder="IMEI, color, accessories, customer name…" maxlength="250" oninput="document.getElementById('cc').textContent=this.value.length"></textarea>
+          <div class="cc"><span id="cc">0</span>/250</div>
+        </div>
+        <div class="fg">
+          <label>Urgency</label>
+          <div class="urg-row">
+            <div class="uo un" id="uNorm" onclick="setUrg('normal')">⏱ Normal</div>
+            <div class="uo" id="uUrg" onclick="setUrg('urgent')">🔥 Urgent</div>
+          </div>
+        </div>
+        <button class="sub-btn" id="subBtn" onclick="submitReq()">SUBMIT REQUEST</button>
+      </div>
+      <div id="rhist" style="display:none">
+        <div class="rh-title">Your Recent Requests</div>
+        <div id="rhistList"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="vSet">
+      <div class="vh">Settings</div>
+      <div class="vs">Account &amp; preferences</div>
+      <div class="prof">
+        <div class="ava" id="sAva">?</div>
+        <div class="pi">
+          <div class="pe" id="sEmail">—</div>
+          <div class="pt">✓ Verified Account</div>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sgt">Preferences</div>
+        <div class="sl">
+          <div class="sr" onclick="doSort()">
+            <div class="ri" style="background:var(--amber-glow)">📅</div>
+            <div class="rb"><div class="rl">Sort Order</div><div class="rs2" id="sortLbl">Newest first</div></div>
+            <div class="re">›</div>
+          </div>
+          <div class="sr" onclick="togglePref('stats')">
+            <div class="ri" style="background:var(--blue-glow)">📊</div>
+            <div class="rb"><div class="rl">Stats Strip</div><div class="rs2">Show counts on jobs screen</div></div>
+            <div class="tog on" id="tStats"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sgt">Data</div>
+        <div class="sl">
+          <div class="sr" onclick="loadJobs();toast('Refreshed!')">
+            <div class="ri" style="background:var(--amber-glow)">🔄</div>
+            <div class="rb"><div class="rl">Refresh Data</div><div class="rs2">Reload all jobs now</div></div>
+            <div class="re">›</div>
+          </div>
+          <div class="sr">
+            <div class="ri" style="background:rgba(100,116,139,.1)">🗂</div>
+            <div class="rb"><div class="rl">Database</div><div class="rs2" id="dbLbl" style="font-family:var(--fm);font-size:10px">—</div></div>
+          </div>
+          <div class="sr">
+            <div class="ri" style="background:rgba(100,116,139,.1)">📋</div>
+            <div class="rb"><div class="rl">Total Jobs</div><div class="rs2" id="totalLbl">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sgt">Config</div>
+        <div class="sl">
+          <div class="sr" onclick="showSetup()">
+            <div class="ri" style="background:rgba(167,139,250,.1)">⚙️</div>
+            <div class="rb"><div class="rl">Firebase Config</div><div class="rs2">Change database connection</div></div>
+            <div class="re">›</div>
+          </div>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sgt">Account</div>
+        <button class="d-btn" onclick="doSignOut()">Sign Out</button>
+      </div>
+      <div class="av">RepairOS v3.0 · shop-adfbb</div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="nav">
+    <button class="nb on" id="nJobs" onclick="switchView('Jobs')">
+      <div class="nbi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+      <span class="nbl">Jobs</span>
+    </button>
+    <button class="nb" id="nReq" onclick="switchView('Req')">
+      <div class="nbi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+      <span class="nbl">Request</span>
+    </button>
+    <button class="nb" id="nSet" onclick="switchView('Set')">
+      <div class="nbi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+      <span class="nbl">Settings</span>
+    </button>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="mover" id="modal" onclick="maybeClose(event)">
+  <div class="msheet">
+    <div class="mhw"><div class="mh"></div></div>
+    <div class="mbadges" id="mBadges"></div>
+    <div class="mdev" id="mDev">—</div>
+    <div class="mts" id="mTs">—</div>
+    <div class="mdiv"></div>
+    <div id="mBody"></div>
+    <button class="mcl" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<!-- Filter Panel -->
+<div class="fbk" id="fbk" onclick="toggleFilter()"></div>
+<div class="fpan" id="fpan">
+  <div class="fpi">
+    <div class="fpt">🎛 Filters</div>
+    <div class="fps">Narrow down your job list</div>
+    <div class="fsc">
+      <div class="fsct">Job Type</div>
+      <div class="fopts" id="fType">
+        <div class="fopt on" data-v="all"     onclick="setFOpt(this,'type')"><div class="fck">✓</div>All Types</div>
+        <div class="fopt"    data-v="request" onclick="setFOpt(this,'type')"><div class="fck"></div>Requests Only</div>
+        <div class="fopt"    data-v="job"     onclick="setFOpt(this,'type')"><div class="fck"></div>Jobs Only</div>
+      </div>
+    </div>
+    <div class="fsc">
+      <div class="fsct">Status</div>
+      <div class="fopts" id="fStatus">
+        <div class="fopt on" data-v="all"      onclick="setFOpt(this,'status')"><div class="fck">✓</div>All Statuses</div>
+        <div class="fopt"    data-v="pending"  onclick="setFOpt(this,'status')"><div class="fck"></div>⏳ Pending</div>
+        <div class="fopt"    data-v="progress" onclick="setFOpt(this,'status')"><div class="fck"></div>🔨 In Progress</div>
+        <div class="fopt"    data-v="spare"    onclick="setFOpt(this,'status')"><div class="fck"></div>📦 Waiting for Spare</div>
+        <div class="fopt"    data-v="complete" onclick="setFOpt(this,'status')"><div class="fck"></div>✅ Complete</div>
+        <div class="fopt"    data-v="collected"onclick="setFOpt(this,'status')"><div class="fck"></div>🎉 Collected</div>
+        <div class="fopt"    data-v="returned" onclick="setFOpt(this,'status')"><div class="fck"></div>↩️ Returned</div>
+      </div>
+    </div>
+    <div class="fsc">
+      <div class="fsct">Technician</div>
+      <div class="fopts" id="fTech">
+        <div class="fopt on" data-v="all" onclick="setFOpt(this,'tech')"><div class="fck">✓</div>All Technicians</div>
+      </div>
+    </div>
+    <button class="fclr" onclick="clearFilters()">✕ Clear All Filters</button>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let fbApp=null, auth=null, db=null;
+let allJobs=[], jobMap={};
+// Default chip: today | sort: newest first
+let chipF='today', panF={type:'all',status:'all',tech:'all'}, searchQ='', sortDesc=true, urg='normal', authMode='login';
+let prefs={stats:true};
+let myReqs=JSON.parse(localStorage.getItem('ros_reqs')||'[]');
+
+// ══════════════════════════════════════
+//  STATUS CONFIG
+// ══════════════════════════════════════
+const STATUS = {
+  pending:   { label:'Pending',           icon:'⏳', cls:'s-pending'  },
+  progress:  { label:'In Progress',       icon:'🔨', cls:'s-progress' },
+  spare:     { label:'Waiting for Spare', icon:'📦', cls:'s-spare'    },
+  complete:  { label:'Complete',          icon:'✅', cls:'s-complete' },
+  collected: { label:'Collected',         icon:'🎉', cls:'s-collected'},
+  returned:  { label:'Returned',          icon:'↩️', cls:'s-returned' },
+};
+function statusBadge(s){
+  const cfg=STATUS[s]||STATUS['pending'];
+  return `<span class="sbadge ${cfg.cls}">${cfg.icon} ${cfg.label}</span>`;
+}
+
+// ══════════════════════════════════════
+//  FIREBASE — persistent app name = 'repairos'
+// ══════════════════════════════════════
+function getCfg(){ return JSON.parse(localStorage.getItem('ros_cfg')||'null'); }
+
+function initFB(cfg){
+  // Reuse existing app if already initialized with same name
+  try {
+    fbApp = firebase.app('repairos');
+  } catch(e) {
+    fbApp = firebase.initializeApp(cfg, 'repairos');
+  }
+  auth = fbApp.auth();
+  db   = fbApp.database();
+  // Explicitly set LOCAL persistence so login survives refreshes
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+  const el=id('dbLbl'); if(el) el.textContent=cfg.databaseURL;
+  listenAuth();
+}
+
+function saveConfig(){
+  const cfg={
+    apiKey:      v('c-key'), authDomain: v('c-auth'),
+    databaseURL: v('c-db'),  projectId:  v('c-proj'), appId: v('c-app'),
+  };
+  if(!cfg.apiKey||!cfg.databaseURL||!cfg.projectId){
+    errEl('c-err','API Key, Database URL and Project ID are required.'); return;
+  }
+  localStorage.setItem('ros_cfg',JSON.stringify(cfg));
+  // Delete existing app so new config takes effect
+  if(fbApp){ try{ fbApp.delete(); fbApp=null; }catch(e){} }
+  initFB(cfg); showScreen('auth');
+}
+
+function useStoredConfig(){
+  const cfg=getCfg();
+  if(!cfg||!cfg.apiKey){ errEl('c-err','No complete config saved. Fill fields below.'); return; }
+  initFB(cfg); showScreen('auth');
+}
+
+function prefillShop(){
+  setv('c-auth','shop-adfbb.firebaseapp.com');
+  setv('c-db','https://shop-adfbb-default-rtdb.firebaseio.com');
+  setv('c-proj','shop-adfbb');
+  errEl('c-err','Fields pre-filled. Now enter your API Key and App ID from Firebase Console.', true);
+}
+
+function showSetup(){
+  const cfg=getCfg()||{};
+  const map={key:'apiKey',auth:'authDomain',db:'databaseURL',proj:'projectId',app:'appId'};
+  Object.entries(map).forEach(([k,fk])=>{ if(cfg[fk]) setv('c-'+k, cfg[fk]); });
+  showScreen('setup');
+}
+
+// ══════════════════════════════════════
+//  BOOT — runs once on page load
+// ══════════════════════════════════════
+(function boot(){
+  const cfg=getCfg();
+  if(cfg&&cfg.apiKey&&cfg.databaseURL){ initFB(cfg); }
+  else { showScreen('setup'); }
+})();
+
+// ══════════════════════════════════════
+//  AUTH LISTENER
+// ══════════════════════════════════════
+function listenAuth(){
+  auth.onAuthStateChanged(u=>{
+    if(!u){
+      showScreen('auth');
+    } else if(!u.emailVerified){
+      setTxt('v-email', u.email); showScreen('verify');
+    } else {
+      showScreen('app'); initApp(u);
+    }
+  });
+}
+
+function switchTab(m){
+  authMode=m;
+  qAll('.a-tab').forEach((t,i)=>t.classList.toggle('on',(i===0&&m==='login')||(i===1&&m==='signup')));
+  setTxt('a-btn', m==='login'?'SIGN IN':'CREATE ACCOUNT');
+  id('a-nwrap').style.display=m==='signup'?'block':'none';
+  setTxt('a-lbl', m==='login'?"Don't have an account?":'Already have an account?');
+  setTxt('a-lbtn', m==='login'?'Register':'Sign In');
+  hide('a-err');
+}
+
+async function doAuth(){
+  const email=v('a-email'), pass=v('a-pass'), btn=id('a-btn');
+  hide('a-err');
+  if(!email||!pass){ errEl('a-err','Please enter email and password.'); return; }
+  btn.disabled=true; btn.textContent='…';
+  try{
+    if(authMode==='login') await auth.signInWithEmailAndPassword(email, pass);
+    else { const c=await auth.createUserWithEmailAndPassword(email,pass); await c.user.sendEmailVerification(); }
+  } catch(e){
+    errEl('a-err', fbErrMsg(e.code));
+    btn.disabled=false; btn.textContent=authMode==='login'?'SIGN IN':'CREATE ACCOUNT';
+  }
+}
+
+async function checkVerified(){
+  await auth.currentUser.reload();
+  if(auth.currentUser.emailVerified){ showScreen('app'); initApp(auth.currentUser); }
+  else toast('Email not verified yet. Check your inbox.', true);
+}
+
+async function resendVerify(){
+  try{ await auth.currentUser.sendEmailVerification(); toast('Verification email sent!'); }
+  catch(e){ toast('Failed to send. Try again later.', true); }
+}
+
+async function doSignOut(){ await auth.signOut(); allJobs=[]; jobMap={}; }
+
+function fbErrMsg(code){
+  const m={
+    'auth/user-not-found':'No account found with this email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/invalid-email':'Invalid email address.',
+    'auth/email-already-in-use':'Email already in use.',
+    'auth/weak-password':'Password must be at least 6 characters.',
+    'auth/too-many-requests':'Too many attempts. Try again later.',
+    'auth/invalid-credential':'Invalid email or password.',
+    'auth/network-request-failed':'Network error. Check your connection.',
+  };
+  return m[code]||`Error: ${code}`;
+}
+
+// ══════════════════════════════════════
+//  APP INIT
+// ══════════════════════════════════════
+function initApp(u){
+  setTxt('sEmail', u.email);
+  id('sAva').textContent=u.email[0].toUpperCase();
+  loadPrefs(); loadJobs(); renderMyReqs();
+}
+
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+async function loadJobs(){
+  const list=id('jlist'), btn=id('refBtn');
+  btn.classList.add('spin');
+  list.innerHTML=`<div class="ls"><div class="loader"></div><div style="color:var(--text-muted);font-size:13px">Loading…</div></div>`;
+  try{
+    const snap=await db.ref('gizmos/jobs').once('value');
+    allJobs=flatten(snap.val()||{});
+    jobMap={};
+    allJobs.forEach(j=>{ jobMap[j._uid]=j; });
+    buildTechOpts(); updateStats(); applyFilters();
+    setTxt('totalLbl', allJobs.length+' total jobs');
+  } catch(e){
+    list.innerHTML=`<div class="es"><div class="ei">⚠️</div><div class="et">Load Failed</div><div class="es2">${esc(e.message)}</div></div>`;
+  }
+  btn.classList.remove('spin');
+}
+
+function flatten(raw){
+  const jobs=[];
+  Object.entries(raw).forEach(([dk,grp])=>{
+    if(!grp||typeof grp!=='object') return;
+    Object.entries(grp).forEach(([rid,job])=>{
+      if(!job||typeof job!=='object') return;
+      jobs.push({_uid:`${dk}__${rid}`, _id:rid, dateKey:dk, ...job});
+    });
+  });
+  // Sort by date desc, then within same date by createdAt desc (newest first)
+  return jobs.sort(sortFn);
+}
+
+function sortFn(a,b){
+  // Parse dateKey DD-MM-YYYY → comparable number YYYYMMDD
+  const dateVal = dk => {
+    const p=dk.split('-');
+    return p.length===3 ? parseInt(`${p[2]}${p[1]}${p[0]}`) : 0;
+  };
+  const da=dateVal(a.dateKey), db2=dateVal(b.dateKey);
+  if(da!==db2) return sortDesc ? db2-da : da-db2;          // date first
+  return sortDesc
+    ? (b.createdAt||0)-(a.createdAt||0)                    // then time
+    : (a.createdAt||0)-(b.createdAt||0);
+}
+
+function applyFilters(){
+  const today=todayKey();
+  let jobs=[...allJobs];
+
+  // Chip filter
+  if(chipF==='today')   jobs=jobs.filter(j=>j.dateKey===today);
+  else if(chipF==='week')    jobs=jobs.filter(j=>dateToMs(j.dateKey)>=Date.now()-7*864e5);
+  else if(chipF==='month')   jobs=jobs.filter(j=>dateToMs(j.dateKey)>=Date.now()-30*864e5);
+  else if(chipF==='request') jobs=jobs.filter(j=>j.type==='request');
+  else if(chipF==='urgent')  jobs=jobs.filter(j=>j.urgency==='urgent');
+  else if(chipF==='pending') jobs=jobs.filter(j=>!j.status||j.status==='pending');
+  else if(chipF==='spare')   jobs=jobs.filter(j=>j.status==='spare');
+
+  // Panel filters
+  if(panF.type==='request') jobs=jobs.filter(j=>j.type==='request');
+  else if(panF.type==='job') jobs=jobs.filter(j=>j.type!=='request');
+  if(panF.status!=='all')   jobs=jobs.filter(j=>(j.status||'pending')===panF.status);
+  if(panF.tech!=='all')     jobs=jobs.filter(j=>j.technician===panF.tech);
+
+  // Search
+  if(searchQ){
+    const q=searchQ.toLowerCase();
+    jobs=jobs.filter(j=>
+      (j.device||'').toLowerCase().includes(q)||
+      (j.complaint||'').toLowerCase().includes(q)||
+      (j.technician||'').toLowerCase().includes(q)||
+      (j.notes||'').toLowerCase().includes(q)
+    );
+  }
+
+  renderJobs(jobs);
+  const hasFilt=panF.type!=='all'||panF.status!=='all'||panF.tech!=='all';
+  id('fDot').classList.toggle('show',hasFilt);
+  id('filtBtn').classList.toggle('on',hasFilt);
+}
+
+function renderJobs(jobs){
+  setTxt('jCount',`${jobs.length} job${jobs.length!==1?'s':''} ${jobs.length<allJobs.length?'(filtered)':''}`);
+  if(!jobs.length){
+    id('jlist').innerHTML=`<div class="es"><div class="ei">${searchQ?'🔍':'📋'}</div><div class="et">${searchQ?'No results':'No jobs'}</div><div class="es2">${searchQ?`Nothing matches "<em>${esc(searchQ)}</em>"`:'Jobs will appear once added to your database.'}</div></div>`;
+    return;
+  }
+  // Group by dateKey — already sorted so order is preserved
+  const groups=[], seen={};
+  jobs.forEach(j=>{
+    if(!seen[j.dateKey]){ seen[j.dateKey]=true; groups.push({dk:j.dateKey,list:[]}); }
+    groups[groups.length-1].list.push(j);
+  });
+  let html='';
+  groups.forEach(({dk,list})=>{
+    html+=`<div class="ddiv"><span class="dlbl">${dateLbl(dk)}</span><div class="dline"></div><span class="dcnt">${list.length}</span></div>`;
+    list.forEach((job,i)=>{ html+=card(job,i); });
+  });
+  id('jlist').innerHTML=html;
+}
+
+function card(job,i){
+  const isReq=job.type==='request', isUrg=job.urgency==='urgent';
+  const cls=isUrg?'urg':isReq?'req':'';
+  const typeBadge=isUrg
+    ?`<span class="tbadge bu">🔥 URGENT</span>`
+    :isReq
+      ?`<span class="tbadge br">REQUEST</span>`
+      :`<span class="tbadge bj">JOB</span>`;
+  const notes=job.notes?`<div class="c-note">📝 ${esc(job.notes)}</div>`:'';
+  return `<div class="jcard ${cls}" onclick="openModal('${job._uid}')" style="animation-delay:${Math.min(i*28,240)}ms">
+    <div class="c-top"><div class="c-dev">${esc(job.device||'Unknown Device')}</div>${typeBadge}</div>
+    ${statusBadge(job.status||'pending')}
+    <div class="c-cmp">${esc(job.complaint||'—')}</div>
+    ${notes}
+    <div class="c-foot">
+      <div class="meta t">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ${esc(job.technician||'—')}
+      </div>
+      <div class="meta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${job.createdAt?fmtTime(job.createdAt):job.dateKey||'—'}
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateStats(){
+  const today=todayKey();
+  setTxt('sTotal',   allJobs.length);
+  setTxt('sToday',   allJobs.filter(j=>j.dateKey===today).length);
+  setTxt('sPending', allJobs.filter(j=>!j.status||j.status==='pending').length);
+  setTxt('sSpare',   allJobs.filter(j=>j.status==='spare').length);
+  setTxt('sDone',    allJobs.filter(j=>j.status==='complete'||j.status==='collected').length);
+  setTxt('sUrg',     allJobs.filter(j=>j.urgency==='urgent').length);
+  id('statsBar').style.display=prefs.stats?'flex':'none';
+}
+
+// ══════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════
+function openModal(uid){
+  const job=jobMap[uid]; if(!job) return;
+  const isReq=job.type==='request', isUrg=job.urgency==='urgent';
+  id('mBadges').innerHTML=
+    statusBadge(job.status||'pending')+
+    (isUrg?`<span class="tbadge bu">🔥 URGENT</span>`:isReq?`<span class="tbadge br">REQUEST</span>`:`<span class="tbadge bj">JOB</span>`);
+  setTxt('mDev', job.device||'Unknown Device');
+  setTxt('mTs',  `${dateLbl(job.dateKey)}  ·  ${job.createdAt?fmtTime(job.createdAt):'—'}`);
+  const fields=[
+    {l:'Complaint / Issue', v:job.complaint||'—'},
+    {l:'Technician',        v:job.technician||'—'},
+    ...(job.notes?[{l:'Notes', v:job.notes}]:[]),
+    {l:'Date Logged',       v:dateLbl(job.dateKey)},
+    {l:'Job ID',            v:job._id, mono:true},
+  ];
+  id('mBody').innerHTML=fields.map(f=>`
+    <div class="mf">
+      <div class="mfl">${f.l}</div>
+      <div class="mfv ${f.mono?'mono':''}">${esc(f.v)}</div>
+    </div>`).join('');
+  id('modal').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function maybeClose(e){ if(e.target===id('modal')) closeModal(); }
+function closeModal(){ id('modal').classList.remove('on'); document.body.style.overflow=''; }
+
+// ══════════════════════════════════════
+//  REQUEST
+// ══════════════════════════════════════
+function setUrg(val){
+  urg=val;
+  id('uNorm').className='uo'+(val==='normal'?' un':'');
+  id('uUrg').className='uo'+(val==='urgent'?' uu':'');
+}
+
+async function submitReq(){
+  const brand=v('r-brand'), model=v('r-model'), cmp=v('r-cmp'), tech=v('r-tech'), notes=v('r-notes');
+  const status=id('r-status').value||'pending';
+  if(!brand||!model){ toast('Enter Brand and Model.',true); return; }
+  if(!cmp){ toast('Enter the complaint.',true); return; }
+  const btn=id('subBtn'); btn.disabled=true; btn.textContent='SUBMITTING…';
+  const dk=todayKey();
+  const data={
+    device:`${brand} ${model}`.toUpperCase(),
+    complaint:cmp, notes, status,
+    technician:tech||'Unassigned',
+    createdAt:Math.floor(Date.now()/1e3),
+    type:'request', urgency:urg,
+  };
+  try{
+    await db.ref(`gizmos/jobs/${dk}`).push(data);
+    toast('✓ Request submitted!');
+    myReqs.unshift({device:data.device,complaint:cmp,date:dk,status});
+    myReqs=myReqs.slice(0,8);
+    localStorage.setItem('ros_reqs',JSON.stringify(myReqs));
+    ['r-brand','r-model','r-cmp','r-tech','r-notes'].forEach(x=>setv(x,''));
+    setTxt('cc','0'); setUrg('normal'); id('r-status').value='pending';
+    renderMyReqs(); await loadJobs();
+    setTimeout(()=>switchView('Jobs'),700);
+  } catch(e){ toast('Failed: '+e.message,true); }
+  btn.disabled=false; btn.textContent='SUBMIT REQUEST';
+}
+
+function renderMyReqs(){
+  const wrap=id('rhist'), list=id('rhistList');
+  if(!myReqs.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  list.innerHTML=myReqs.slice(0,5).map(r=>`
+    <div class="rh-item">
+      <div class="rh-dev">${esc(r.device)}</div>
+      <div class="rh-meta">${esc(r.complaint)} · ${dateLbl(r.date)}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+//  FILTERS & SEARCH
+// ══════════════════════════════════════
+function handleSearch(val){ searchQ=val.trim(); id('srch-x').style.display=searchQ?'block':'none'; applyFilters(); }
+function clearSearch(){ setv('srch-in',''); id('srch-x').style.display='none'; searchQ=''; applyFilters(); }
+
+function setChip(el){
+  chipF=el.dataset.f;
+  qAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  applyFilters();
+}
+
+function toggleFilter(){ id('fpan').classList.toggle('on'); id('fbk').classList.toggle('on'); }
+
+function setFOpt(el,cat){
+  const val=el.dataset.v, cont=el.closest('.fopts');
+  cont.querySelectorAll('.fopt').forEach(o=>{ o.classList.remove('on'); o.querySelector('.fck').textContent=''; });
+  el.classList.add('on'); el.querySelector('.fck').textContent='✓';
+  panF[cat]=val; applyFilters();
+}
+
+function clearFilters(){
+  panF={type:'all',status:'all',tech:'all'};
+  qAll('.fopts').forEach(c=>{
+    c.querySelectorAll('.fopt').forEach((o,i)=>{ o.classList.toggle('on',i===0); o.querySelector('.fck').textContent=i===0?'✓':''; });
+  });
+  chipF='today';
+  qAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.f==='today'));
+  clearSearch(); toggleFilter(); applyFilters();
+}
+
+function buildTechOpts(){
+  const techs=[...new Set(allJobs.map(j=>j.technician).filter(Boolean))].sort();
+  id('fTech').innerHTML=`<div class="fopt on" data-v="all" onclick="setFOpt(this,'tech')"><div class="fck">✓</div>All Technicians</div>`
+    +techs.map(t=>`<div class="fopt" data-v="${esc(t)}" onclick="setFOpt(this,'tech')"><div class="fck"></div>${esc(t)}</div>`).join('');
+}
+
+function doSort(){
+  sortDesc=!sortDesc;
+  allJobs.sort(sortFn);
+  setTxt('sortLbl', sortDesc?'Newest first':'Oldest first');
+  applyFilters();
+}
+
+// ══════════════════════════════════════
+//  PREFS
+// ══════════════════════════════════════
+function loadPrefs(){
+  const s=JSON.parse(localStorage.getItem('ros_prefs')||'{}');
+  prefs={stats:true,...s};
+  id('tStats').classList.toggle('on',prefs.stats);
+}
+function savePrefs(){ localStorage.setItem('ros_prefs',JSON.stringify(prefs)); }
+function togglePref(k){ prefs[k]=!prefs[k]; id('t'+k[0].toUpperCase()+k.slice(1)).classList.toggle('on',prefs[k]); savePrefs(); if(k==='stats') updateStats(); }
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+function switchView(name){
+  qAll('.view').forEach(v=>v.classList.remove('on'));
+  qAll('.nb').forEach(n=>n.classList.remove('on'));
+  id('v'+name).classList.add('on');
+  id('n'+name).classList.add('on');
+  const isJ=name==='Jobs';
+  id('mainHdr').style.display=isJ?'block':'none';
+  id('chipRow').style.display=isJ?'flex':'none';
+}
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+function showScreen(s){
+  id('setup-screen').style.display  = s==='setup'  ? 'flex':'none';
+  id('auth-screen').style.display   = s==='auth'   ? 'flex':'none';
+  id('verify-screen').style.display = s==='verify' ? 'flex':'none';
+  id('app').style.display           = s==='app'    ? 'flex':'none';
+}
+function todayKey(){ const n=new Date(); return `${pad(n.getDate())}-${pad(n.getMonth()+1)}-${n.getFullYear()}`; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function dateToMs(dk){
+  const p=dk.split('-');
+  return p.length===3 ? new Date(+p[2],+p[1]-1,+p[0]).getTime() : 0;
+}
+function dateLbl(dk){
+  if(!dk) return '—';
+  if(dk===todayKey()) return '📅 Today';
+  const p=dk.split('-');
+  if(p.length===3){
+    const d=new Date(+p[2],+p[1]-1,+p[0]);
+    if(!isNaN(d)){
+      const diff=Math.floor((Date.now()-d)/864e5);
+      if(diff===1) return '📅 Yesterday';
+      return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    }
+  }
+  return dk;
+}
+function fmtTime(ts){ return new Date(ts*1e3).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let _tt;
+function toast(msg,err=false){
+  const el=id('toastEl'); el.textContent=msg;
+  el.className='toast'+(err?' err':''); el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3000);
+}
+function id(x){ return document.getElementById(x); }
+function v(x){ return (id(x)||{}).value?.trim()||''; }
+function setv(x,val){ const el=id(x); if(el) el.value=val; }
+function setTxt(x,t){ const el=id(x); if(el) el.textContent=t; }
+function hide(x){ const el=id(x); if(el) el.style.display='none'; }
+function qAll(s){ return Array.from(document.querySelectorAll(s)); }
+function errEl(elId,msg,warn=false){
+  const el=id(elId); if(!el) return;
+  el.textContent=msg; el.style.display='block'; el.style.color=warn?'#fbbf24':'#fca5a5';
+}
+
+// Keyboard
+id('a-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth(); });
+id('a-email').addEventListener('keydown',e=>{ if(e.key==='Enter') id('a-pass').focus(); });
+</script>
+</body>
+</html>
