@@ -1009,3 +1009,8 @@ button.create_new_gizmos:hover { background: rgba(10,132,255,0.18); transform: t
   padding: 20px;
   opacity: 0.7;
 }
+
+.dim-amount {
+  opacity: 0.5;
+  text-decoration: line-through; /* or any style you prefer */
+}

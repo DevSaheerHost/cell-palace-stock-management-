@@ -1054,7 +1054,7 @@ const isCurrentMonth = (dateKey) => {
   // change months here today.getMonth()-1
   return (
     jobDate.getFullYear() === today.getFullYear() &&
-    jobDate.getMonth() === today.getMonth() &&
+    jobDate.getMonth() === today.getMonth()-1 &&
     jobDate <= today
   )
 }
@@ -1120,15 +1120,14 @@ const renderGizmos = (jobs) => {
   };
   
   // Define the status options array for easy iteration
-const statusOptions = [
-  { value: "pending", label: "⏳ Pending" },
-  { value: "progress", label: "🔨 In Progress" },
-  { value: "spare", label: "📦 Waiting for Spare" },
-  { value: "complete", label: "✅ Complete" },
-  { value: "collected", label: "🎉 Collected" },
-  { value: "returned", label: "↩️ Returned" }
-];
-
+  const statusOptions = [
+    { value: "pending", label: "⏳ Pending" },
+    { value: "progress", label: "🔨 In Progress" },
+    { value: "spare", label: "📦 Waiting for Spare" },
+    { value: "complete", label: "✅ Complete" },
+    { value: "collected", label: "🎉 Collected" },
+    { value: "returned", label: "↩️ Returned" }
+  ];
 
   const getJobType = (text) => {
     if (keywords.curved.some(k => text.includes(k))) return 'curved';
@@ -1161,77 +1160,83 @@ const statusOptions = [
       const complaintText = (job.complaint || "").toUpperCase();
       const type = getJobType(complaintText);
 
-      if (type) counts[type]++;
+      // Increment amount counts ONLY if the job is 'collected'
+      if (type && job.status === 'collected') {
+        counts[type]++;
+      }
 
-      const amount = type ? `+₹${prices[type]}` : '';
+      const amountText = type ? `+₹${prices[type]}` : '';
       
-      
+      // Determine the CSS class based on the collection status
+      const amountStatusClass = (job.status === 'collected') ? 'amount' : 'amount dim-amount';
       
       // Generate options HTML and mark the current job status as selected
-let selectOptionsHtml = "";
-statusOptions.forEach(option => {
-  const isSelected = job.status === option.value ? "selected" : "";
-  selectOptionsHtml += `<option value="${option.value}" ${isSelected}>${option.label}</option>`;
-});
-
+      let selectOptionsHtml = "";
+      statusOptions.forEach(option => {
+        const isSelected = job.status === option.value ? "selected" : "";
+        selectOptionsHtml += `<option value="${option.value}" ${isSelected}>${option.label}</option>`;
+      });
 
       const card = document.createElement("div");
       card.className = "job-card gizmo-card";
 
       card.innerHTML = `
-  <h3>${job.device}</h3>
-  <p><b>Complaint:</b> ${job.complaint}</p>
-  <p><b>Notes:</b> ${job.notes || ''}</p>
-  <p class='technician'>${job.technician || ''}</p>
-  <p class='amount'>${amount}</p>
-  
-  <div class="status-updater">
-    <label for="status-${id}"><b>Status:</b></label>
-    <select id="status-${id}" class="status-dropdown" data-job-id="${id}" data-date="${date}">
-      ${selectOptionsHtml}
-    </select>
-  </div>
-`;
+        <h3>${job.device}</h3>
+        <p><b>Complaint:</b> ${job.complaint}</p>
+        <p><b>Notes:</b> ${job.notes || ''}</p>
+        <p class='technician'>${job.technician || ''}</p>
+        <p class='${amountStatusClass}'>${amountText}</p>
+        
+        <div class="status-updater">
+          <label for="status-${id}"><b>Status:</b></label>
+          <select id="status-${id}" class="status-dropdown" data-job-id="${id}" data-date="${date}">
+            ${selectOptionsHtml}
+          </select>
+        </div>
+      `;
 
       list.appendChild(card);
       
       // Attach the event listener directly to the newly created select element
-const statusDropdown = card.querySelector(`#status-${id}`);
+      const statusDropdown = card.querySelector(`#status-${id}`);
 
-statusDropdown.addEventListener("change", async (event) => {
-  const newStatus = event.target.value;
-  const jobId = event.target.getAttribute("data-job-id");
-  const jobDate = event.target.getAttribute("data-date");
+      statusDropdown.addEventListener("change", async (event) => {
+        const newStatus = event.target.value;
+        const jobId = event.target.getAttribute("data-job-id");
+        const jobDate = event.target.getAttribute("data-date");
 
-  // Disable the dropdown while updating to prevent multiple clicks
-  event.target.disabled = true;
+        // Disable the dropdown while updating to prevent multiple clicks
+        event.target.disabled = true;
 
-  try {
-    // Create a reference directly to the specific job using its date and ID
-    const jobRef = ref(db, `gizmos/jobs/${jobDate}/${jobId}`);
+        try {
+          // Create a reference directly to the specific job using its date and ID
+          const jobRef = ref(db, `gizmos/jobs/${jobDate}/${jobId}`);
 
-    // Update only the 'status' property of that specific job
-    await update(jobRef, {
-      status: newStatus
-    });
+          // Update only the 'status' property of that specific job
+          await update(jobRef, {
+            status: newStatus
+          });
 
-    // Update the local state so it doesn't revert incorrectly later
-    job.status = newStatus;
-    
-    console.log(`Successfully updated job ${jobId} to ${newStatus}`);
+          // Update the local state so it doesn't revert incorrectly later
+          job.status = newStatus;
+          
+          console.log(`Successfully updated job ${jobId} to ${newStatus}`);
+          
+          // NOTE: If you are not using Firebase onValue() listener to auto-refresh the UI,
+          // you might need to re-fetch or re-render the list here to update the total counts immediately.
 
-  } catch (error) {
-    console.error("Error updating status in database:", error);
-    
-    // Revert the dropdown UI back to the old status if the update fails
-    event.target.value = job.status; 
-    alert("Failed to update status. Please check your connection and try again.");
-    
-  } finally {
-    // Re-enable the dropdown
-    event.target.disabled = false;
-  }
-});
+        } catch (error) {
+          console.error("Error updating status in database:", error);
+          
+          // Revert the dropdown UI back to the old status if the update fails
+          event.target.value = job.status; 
+          alert("Failed to update status. Please check your connection and try again.");
+          
+        } finally {
+          // Re-enable the dropdown
+          event.target.disabled = false;
+        }
+      });
     });
   });
 
@@ -1275,6 +1280,7 @@ statusDropdown.addEventListener("change", async (event) => {
   document.querySelector('#iphoneGlassEle').innerHTML =
     `<div class='workAmountElement'>iPhone Back Glass : ${counts.iphoneGlass} - <span class='amount'>₹${totals.iphoneGlass.toLocaleString()}</span></div>`;
 };
+
 
 const loadGizmosWorks = () => {
   const listContainer = document.querySelector('#gizmos-list')
