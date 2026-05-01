@@ -1014,3 +1014,7 @@ button.create_new_gizmos:hover { background: rgba(10,132,255,0.18); transform: t
   opacity: 0.5;
   text-decoration: line-through; /* or any style you prefer */
 }
+.select-disabled{
+  opacity: 0.5;
+  
+}

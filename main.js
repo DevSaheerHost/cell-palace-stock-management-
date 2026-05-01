@@ -174,6 +174,25 @@ function showPrompt(message, {
   });
 }
 
+const showToast = (message, duration = 3000) => {
+  // Create the toast element
+  const toast = document.createElement("div");
+  toast.className = "toast-message";
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 10);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, duration);
+};
+
+
 async function ensureTechnicianName() {
   const existing = localStorage.getItem(TECHNICIAN_NAME_KEY);
   if (existing && existing.trim()) return existing.trim();
@@ -1054,7 +1073,7 @@ const isCurrentMonth = (dateKey) => {
   // change months here today.getMonth()-1
   return (
     jobDate.getFullYear() === today.getFullYear() &&
-    jobDate.getMonth() === today.getMonth()-1 &&
+    jobDate.getMonth() === today.getMonth() &&
     jobDate <= today
   )
 }
@@ -1199,8 +1218,19 @@ const renderGizmos = (jobs) => {
       
       // Attach the event listener directly to the newly created select element
       const statusDropdown = card.querySelector(`#status-${id}`);
+      statusDropdown.onclick=()=>{
+        if(!isUserauth()){
+          statusDropdown.disabled='true'
+          showAlert('You need to be logged in to update the job status. Please log in to continue.',{
+            title: 'Login Required',
+            variant: 'error'
+          })
+          return
+        }
+      }
 
       statusDropdown.addEventListener("change", async (event) => {
+        
         const newStatus = event.target.value;
         const jobId = event.target.getAttribute("data-job-id");
         const jobDate = event.target.getAttribute("data-date");
