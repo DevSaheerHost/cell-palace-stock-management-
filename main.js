@@ -1051,7 +1051,7 @@ const isCurrentMonth = (dateKey) => {
   
   const [day, month, year] = dateKey.split("-").map(Number)
   const jobDate = new Date(year, month - 1, day)
-  
+  // change months here today.getMonth()-1
   return (
     jobDate.getFullYear() === today.getFullYear() &&
     jobDate.getMonth() === today.getMonth() &&
@@ -1118,6 +1118,17 @@ const renderGizmos = (jobs) => {
     backpanel: ['PACKPANEL', 'PACKPANNEL', 'BACK PANEL', 'BACK PANNEL'],
     iphoneGlass: ['BACKGLASS', 'BACK GLASS']
   };
+  
+  // Define the status options array for easy iteration
+const statusOptions = [
+  { value: "pending", label: "⏳ Pending" },
+  { value: "progress", label: "🔨 In Progress" },
+  { value: "spare", label: "📦 Waiting for Spare" },
+  { value: "complete", label: "✅ Complete" },
+  { value: "collected", label: "🎉 Collected" },
+  { value: "returned", label: "↩️ Returned" }
+];
+
 
   const getJobType = (text) => {
     if (keywords.curved.some(k => text.includes(k))) return 'curved';
@@ -1153,19 +1164,74 @@ const renderGizmos = (jobs) => {
       if (type) counts[type]++;
 
       const amount = type ? `+₹${prices[type]}` : '';
+      
+      
+      
+      // Generate options HTML and mark the current job status as selected
+let selectOptionsHtml = "";
+statusOptions.forEach(option => {
+  const isSelected = job.status === option.value ? "selected" : "";
+  selectOptionsHtml += `<option value="${option.value}" ${isSelected}>${option.label}</option>`;
+});
+
 
       const card = document.createElement("div");
       card.className = "job-card gizmo-card";
 
       card.innerHTML = `
-        <h3>${job.device}</h3>
-        <p><b>Complaint:</b> ${job.complaint}</p>
-        <p><b>Notes:</b> ${job.notes || ''}</p>
-        <p class='technician'>${job.technician || ''}</p>
-        <p class='amount'>${amount}</p>
-      `;
+  <h3>${job.device}</h3>
+  <p><b>Complaint:</b> ${job.complaint}</p>
+  <p><b>Notes:</b> ${job.notes || ''}</p>
+  <p class='technician'>${job.technician || ''}</p>
+  <p class='amount'>${amount}</p>
+  
+  <div class="status-updater">
+    <label for="status-${id}"><b>Status:</b></label>
+    <select id="status-${id}" class="status-dropdown" data-job-id="${id}" data-date="${date}">
+      ${selectOptionsHtml}
+    </select>
+  </div>
+`;
 
       list.appendChild(card);
+      
+      // Attach the event listener directly to the newly created select element
+const statusDropdown = card.querySelector(`#status-${id}`);
+
+statusDropdown.addEventListener("change", async (event) => {
+  const newStatus = event.target.value;
+  const jobId = event.target.getAttribute("data-job-id");
+  const jobDate = event.target.getAttribute("data-date");
+
+  // Disable the dropdown while updating to prevent multiple clicks
+  event.target.disabled = true;
+
+  try {
+    // Create a reference directly to the specific job using its date and ID
+    const jobRef = ref(db, `gizmos/jobs/${jobDate}/${jobId}`);
+
+    // Update only the 'status' property of that specific job
+    await update(jobRef, {
+      status: newStatus
+    });
+
+    // Update the local state so it doesn't revert incorrectly later
+    job.status = newStatus;
+    
+    console.log(`Successfully updated job ${jobId} to ${newStatus}`);
+
+  } catch (error) {
+    console.error("Error updating status in database:", error);
+    
+    // Revert the dropdown UI back to the old status if the update fails
+    event.target.value = job.status; 
+    alert("Failed to update status. Please check your connection and try again.");
+    
+  } finally {
+    // Re-enable the dropdown
+    event.target.disabled = false;
+  }
+});
     });
   });
 
