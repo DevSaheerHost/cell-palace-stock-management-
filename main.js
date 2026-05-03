@@ -1095,6 +1095,110 @@ const formatTime = (timestamp) => {
 }
 
 
+// Function to handle the print logic
+// Assuming 'globalJobsData' is your state containing all the jobs
+const initializePrintFeature = (globalJobsData) => {
+  const openBtn = document.getElementById("open-print-modal-btn");
+  const modal = document.getElementById("print-modal");
+  const closeBtn = document.getElementById("close-print-modal");
+  const printBtn = document.getElementById("confirm-print-btn");
+  const monthInput = document.getElementById("print-month-input");
+  const printContainer = document.getElementById("print-container");
+
+  // Set default month to current month
+  const today = new Date();
+  const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  monthInput.value = currentMonth;
+
+  // Open Modal
+  openBtn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+  });
+
+  // Close Modal
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  // Handle Print Action
+  printBtn.addEventListener("click", () => {
+    const selectedMonth = monthInput.value; // Format: "YYYY-MM" (e.g., "2026-04")
+    
+    if (!selectedMonth) {
+      alert("Please select a month to print.");
+      return;
+    }
+    printContainer.style.display='block'
+
+    // Convert YYYY-MM to MM-YYYY to match the database keys
+    const [year, month] = selectedMonth.split("-");
+    const targetMonthYear = `${month}-${year}`; // e.g., "04-2026"
+
+    let printHTML = `
+      <h2>Monthly Report: ${selectedMonth}</h2>
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Device</th>
+            <th>Complaint</th>
+            <th>Technician</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    let totalJobsInMonth = 0;
+
+    // Filter and build table rows
+    Object.keys(globalJobsData).forEach(dateKey => {
+      // Check if the dateKey ends with the target MM-YYYY (e.g., "01-04-2026" ends with "04-2026")
+      if (dateKey.endsWith(targetMonthYear)) {
+        Object.entries(globalJobsData[dateKey]).forEach(([id, job]) => {
+          totalJobsInMonth++;
+          printHTML += `
+            <tr>
+              <td>${dateKey}</td>
+              <td>${job.device || '-'}</td>
+              <td>${job.complaint || '-'}</td>
+              <td>${job.technician || '-'}</td>
+              <td>${(job.status || 'pending').toUpperCase()}</td>
+            </tr>
+          `;
+        });
+      }
+    });
+
+    if (totalJobsInMonth === 0) {
+      printHTML += `<tr><td colspan="5" style="text-align: center;">No jobs found for this month.</td></tr>`;
+    }
+
+    printHTML += `
+        </tbody>
+      </table>
+      <p style="margin-top: 20px; font-weight: bold;">Total Jobs: ${totalJobsInMonth}</p>
+    `;
+
+    // Inject HTML into the print container
+    printContainer.innerHTML = printHTML;
+
+    // Close the modal
+    modal.classList.add("hidden");
+
+    // Trigger browser print
+    window.print();
+    setTimeout(()=>printContainer.style.display='none', 2000)
+  });
+
+};
+
+// Call this function and pass your jobs data when your app loads or when jobs data changes.
+// Example: initializePrintFeature(jobs);
+
+
+
+
 // List splitter Header helper
 const getDateLabel = (dateKey) => {
 
@@ -1111,6 +1215,7 @@ const getDateLabel = (dateKey) => {
 }
 
 const renderGizmos = (jobs) => {
+  initializePrintFeature(jobs)
 
   let totalJobCount = 0;
 
@@ -1335,6 +1440,7 @@ const loadGizmosWorks = () => {
 
 
 loadGizmosWorks()
+
 
 
   
