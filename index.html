@@ -174,9 +174,24 @@
       <header>
   <div class="flex-between">
     <h2>Gizmos Works</h2>
+   
+    <button id="open-print-modal-btn" class="print-btn">Print</button>  
     <button id="logoutBtn">Logout</button>
+
   </div>
 </header>
+
+
+
+
+
+
+
+
+
+<div id="print-container"></div>
+
+
 
 
 <div class="gizmos flex-between create-flex">
@@ -268,6 +283,23 @@
     <div class="modal-actions">
       <button type="button" id="modalBtnSecondary" class="modal-btn secondary hidden">Cancel</button>
       <button type="button" id="modalBtnPrimary" class="modal-btn primary">OK</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="print-modal" class="print-modal-overlay hidden">
+  <div class="print-modal-content">
+    <h3>Print Monthly Report</h3>
+    <p>Select a month to print the job details.</p>
+    
+    <div class="print-input-group">
+      <input type="month" id="print-month-input" class="print-month-picker" />
+    </div>
+    
+    <div class="print-modal-actions">
+      <button id="close-print-modal" class="btn-cancel">Cancel</button>
+      <button id="confirm-print-btn" class="btn-print">Print</button>
     </div>
   </div>
 </div>
